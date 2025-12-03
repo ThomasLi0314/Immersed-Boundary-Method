@@ -1,0 +1,15 @@
+\documentclass[../Immersed_Boundary_Method.tex]{subfiles}
+
+\begin{document}
+
+\section{Introduction}
+
+\subsection{The Interpolation Function}
+
+Given the material position $X$ we want to obtian the velocity of fluid at that point. \mn{Note that $X$ usually doesn't lies on the grid point.} This process is directly interpreted by 
+\begin{equation}
+    \bfu(\mathbf{X}(r, s, t), t)=\int \bfu(\mathbf{x}, t) \delta(\mathbf{x}-\mathbf{X}(r, s, t)) d \mathbf{x}
+\end{equation}
+However in the discrete case we would need the discrete Delta Function. 
+
+\end{document}

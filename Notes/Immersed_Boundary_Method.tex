@@ -1,0 +1,26 @@
+\documentclass{article}
+
+\usepackage{D:/Documents/Latex_Template/NotesTeXV3_test}
+\usepackage{subfiles}
+
+\input{New_Commands.tex}
+
+\special{dvipdfmx:config z 0}
+
+\begin{document}
+
+\title{{Notes on Immersed Boundary Method}\\{\normalsize{\itshape Junior Year}}}
+	\author{Thomas Li}
+	\affiliation{
+	Undergrauate Student at New York University Shanghai\\
+	}
+	\emailAdd{jl15535@nyu.edu}
+	\maketitle
+    \pagestyle{fancynotes}
+	\newpage
+
+\subfile{IMB_Introduction/Section_1.tex}
+
+\subfile{Penalty_Immersed_Boundary/section2.tex}
+
+\end{document}
