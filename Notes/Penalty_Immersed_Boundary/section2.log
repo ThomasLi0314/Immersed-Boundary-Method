@@ -1,13 +1,18 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  10 DEC 2025 20:28
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  6 DEC 2025 13:54
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**"d:/Documents/College/Research/Immersed Boundary Methods/Immersed-Boundary-Method/Notes/Immersed_Boundary_Method"
-(d:/Documents/College/Research/Immersed Boundary Methods/Immersed-Boundary-Method/Notes/Immersed_Boundary_Method.tex
+**"d:/Documents/College/Research/Immersed Boundary Methods/Immersed-Boundary-Method/Notes/Penalty_Immersed_Boundary/section2"
+(d:/Documents/College/Research/Immersed Boundary Methods/Immersed-Boundary-Method/Notes/Penalty_Immersed_Boundary/section2.tex
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
-(d:/Program Files/texlive/2024/texmf-dist/tex/latex/base/article.cls
+(d:/Program Files/texlive/2024/texmf-dist/tex/latex/subfiles/subfiles.cls
+Document Class: subfiles 2020/11/14 v2.2 Multi-file projects (class)
+Preamble taken from file `../Immersed_Boundary_Method.tex'
+(d:/Program Files/texlive/2024/texmf-dist/tex/latex/import/import.sty
+Package: import 2020/04/01  v 6.2
+) (../Immersed_Boundary_Method.tex (d:/Program Files/texlive/2024/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
 (d:/Program Files/texlive/2024/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
@@ -23,9 +28,9 @@ File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip48
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
-) (d:/Documents/Latex/Latex_Template/NotesTeXV3_test.sty
+) (d:/Documents/Latex_Template/NotesTeXV3_test.sty
 
-LaTeX Warning: You have requested package `D://Documents/Latex/Latex_Template/NotesTeXV3_test',
+LaTeX Warning: You have requested package `D:/Documents/Latex_Template/NotesTeXV3_test',
                but the package provides `NotesTeXV3_test'.
 
 Package: NotesTeXV3_test 2021/10/22 rV3
@@ -940,44 +945,42 @@ Package: titlesec 2023/10/27 v2.16 Sectioning titles
 \titlewidthfirst=\dimen340
 )) (d:/Program Files/texlive/2024/texmf-dist/tex/latex/subfiles/subfiles.sty
 Package: subfiles 2020/11/14 v2.2 Multi-file projects (package)
- (d:/Program Files/texlive/2024/texmf-dist/tex/latex/import/import.sty
-Package: import 2020/04/01  v 6.2
-)) (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.sty
+) (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.sty
 Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count383
 \l__lipsum_a_int=\count384
 \l__lipsum_b_int=\count385
- (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (d:/Documents/Latex/Latex_Template/Custom_Commands.tex) (./Immersed_Boundary_Method.aux)
-\openout1 = `Immersed_Boundary_Method.aux'.
+ (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (../New_Commands.tex))) (./section2.aux)
+\openout1 = `section2.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 12.
-LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 12.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 3.
+LaTeX Font Info:    Trying to load font information for TS1+cmr on input line 3.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 12.
-LaTeX Font Info:    ... okay on input line 12.
-Package hyperref Info: Link coloring ON on input line 12.
- (./Immersed_Boundary_Method.out) (./Immersed_Boundary_Method.out)
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for TU/lmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+Package hyperref Info: Link coloring ON on input line 3.
+ (./section2.out) (./section2.out)
 \@outlinefile=\write4
-\openout4 = `Immersed_Boundary_Method.out'.
+\openout4 = `section2.out'.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: changepage package is loaded.
@@ -1033,123 +1036,65 @@ Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: dvipdfm (xetex) on input line 98.
 ))
-*geometry* verbose mode - [ newgeometry ] result:
-* driver: xetex
-* paper: custom
-* layout: <same size as paper>
-* layoutoffset:(h,v)=(0.0pt,0.0pt)
-* modes: 
-* h-part:(L,W,R)=(61.42856pt, 491.43787pt, 61.42857pt)
-* v-part:(T,H,B)=(95.39737pt, 556.47656pt, 143.09605pt)
-* \paperwidth=614.295pt
-* \paperheight=794.96999pt
-* \textwidth=491.43787pt
-* \textheight=556.47656pt
-* \oddsidemargin=-10.84143pt
-* \evensidemargin=-10.84143pt
-* \topmargin=-16.62352pt
-* \headheight=15.90279pt
-* \headsep=23.84811pt
-* \topskip=10.0pt
-* \footskip=20.0pt
-* \marginparwidth=0.0pt
-* \marginparsep=0.0pt
-* \columnsep=10.0pt
-* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
-* \hoffset=0.0pt
-* \voffset=0.0pt
-* \mag=1000
-* \@twocolumnfalse
-* \@twosidefalse
-* \@mparswitchfalse
-* \@reversemarginfalse
-* (1in=72.27pt=25.4mm, 1cm=28.453pt)
-
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 20.
- (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/t1lmss.fd
-File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-
-LaTeX Font Warning: Font shape `T1/lmr/m/scit' undefined
-(Font)              using `T1/lmr/m/scsl' instead on input line 20.
-
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 20.
-(d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 20.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 20.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 20.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 20.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 20.
+(Font)              <10> on input line 10.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 20.
+(Font)              <7> on input line 10.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 20.
-LaTeX Font Info:    Trying to load font information for U+rsfs on input line 20.
+(Font)              <5> on input line 10.
+LaTeX Font Info:    Trying to load font information for U+rsfs on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
-LaTeX Font Info:    Trying to load font information for U+msa on input line 20.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 20.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 10.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [0
-
-
-]
-Package marginnote Info: Using workaround for absolute page number on input line 20.
- (./Immersed_Boundary_Method.toc)
-\tf@toc=\write5
-\openout5 = `Immersed_Boundary_Method.toc'.
-
- [1] (./IMB_Introduction/Section_1.tex
-Package marginnote Info: Margin note 4.1 is on absolute page 4 on input line 9.
-Package marginnote Info: right page because not two side mode on input line 9.
-Package marginnote Info: xpos seems to be 440.23674pt on input line 9.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 9.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 9.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 31.
-) (./Penalty_Immersed_Boundary/section2.tex
+)
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 12.
+ (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/t1lmss.fd
+File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 Package hyperref Info: bookmark level for unknown explanation defaults to 0 on input line 12.
- [1
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 14.
+ (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [1
 
-]
-Package marginnote Info: Using workaround for absolute page number on input line 25.
-) [2] (./Immersed_Boundary_Method.aux)
+] (./section2.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
  ***********
-Package rerunfilecheck Info: File `Immersed_Boundary_Method.out' has not changed.
-(rerunfilecheck)             Checksum: 4C410B55F557C6528C87FF05E4144CC1;914.
+Package rerunfilecheck Info: File `section2.out' has not changed.
+(rerunfilecheck)             Checksum: 7A4A5632F45921B9EB992F6242BAF31F;618.
  ) 
 Here is how much of TeX's memory you used:
- 34331 strings out of 474773
- 669055 string characters out of 5755059
- 1942842 words of memory out of 5000000
- 55822 multiletter control sequences out of 15000+600000
- 677554 words of font info for 120 fonts, out of 8000000 for 9000
+ 34218 strings out of 474773
+ 666554 string characters out of 5755059
+ 1944842 words of memory out of 5000000
+ 55734 multiletter control sequences out of 15000+600000
+ 621669 words of font info for 83 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 116i,12n,121p,646b,2235s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 136i,11n,138p,696b,2139s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on Immersed_Boundary_Method.pdf (4 pages).
+Output written on section2.pdf (1 page).

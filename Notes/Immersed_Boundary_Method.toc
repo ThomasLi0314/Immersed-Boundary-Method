@@ -1,2 +1,5 @@
 \contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
-\contentsline {section}{\numberline {2}Introduction}{1}{section.2}%
+\contentsline {subsection}{\numberline {1.1}The Interpolation Function}{1}{subsection.1.1}%
+\contentsline {section}{\numberline {2}Penalty Immersed Boundary Method (PIB)}{1}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Rigid Body pIB}{1}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Implementation : Circle in Flow}{2}{subsubsection.2.1.1}%

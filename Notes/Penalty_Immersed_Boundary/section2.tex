@@ -4,5 +4,25 @@
 
 \section{Penalty Immersed Boundary Method (PIB)}
 
+The Penalty Immersed Boundary Methods is a simple approach try to solve fluid-structure interaction with material bounadary that has mass. 
 
+\subsection{Rigid Body pIB}
+One kind of problem pIB can simulates is a rigid body in flow. The key of pIB is to consider two sets of Material Points, denoted as $X(q,s,t)$ and $Y(q,s,t)$. Here $q,r$ are Lagrangian Coordinate and $t$ is time. $\bfX$ is the true boundary points that interact masslessly with the flow, and $\bfY$ is called the \textbf{Ghost Mass}. It doesn't interact with the flow but only with the Material points $\bfX$ through an imaginary spring. 
+\begin{explanation}
+    \begin{enumerate}
+        \item At the start, the Material points' position is updated using fluid velocity interpolated at $\bfX$. 
+        \begin{lstlisting}
+                X_half_top = X_tube_top + dt / 2 * interpolation(u, X_tube_top, Num_b, Nx, Ny, dx, dy);
+        \end{lstlisting}
+        \item The force acting to the fluid by the Material is modeled by a spring connecting the Ghost point and material point. 
+        \begin{equation}
+            \mathbf{F}(q, r,t)=K(\mathbf{Y}(q, r,t)-\mathbf{X}(q, r, t))
+        \end{equation}
+        \item Then spread the force $F$ to Eucleadian space. 
+        \item Numerically solve the time evolution of fluid using Navier Stokes solver. 
+        \item Update the Material point position $\bfX$. 
+    \end{enumerate}
+\end{explanation}
+
+\subsubsection{Implementation : Circle in Flow}
 \end{document}
