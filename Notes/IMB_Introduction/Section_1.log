@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  3 DEC 2025 18:41
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  14 DEC 2025 10:26
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -28,9 +28,9 @@ File: size10.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip48
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
-) (d:/Documents/Latex_Template/NotesTeXV3_test.sty
+) (d:/Documents/Latex/Latex_Template/NotesTeXV3_test.sty
 
-LaTeX Warning: You have requested package `D:/Documents/Latex_Template/NotesTeXV3_test',
+LaTeX Warning: You have requested package `D://Documents/Latex/Latex_Template/NotesTeXV3_test',
                but the package provides `NotesTeXV3_test'.
 
 Package: NotesTeXV3_test 2021/10/22 rV3
@@ -950,7 +950,7 @@ Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count383
 \l__lipsum_a_int=\count384
 \l__lipsum_b_int=\count385
- (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (../New_Commands.tex))) (./Section_1.aux)
+ (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (d:/Documents/Latex/Latex_Template/Custom_Commands.tex))) (./Section_1.aux)
 \openout1 = `Section_1.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
@@ -1081,21 +1081,28 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <9> on input line 31.
  [1
 
-] (./Section_1.aux)
+]
+Package marginnote Info: Margin note 2.1 is on absolute page 2 on input line 103.
+Package marginnote Info: right page because not two side mode on input line 103.
+Package marginnote Info: xpos seems to be 378.67549pt on input line 103.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 103.
+ (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [2] (./Section_1.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
  ***********
 Package rerunfilecheck Info: File `Section_1.out' has not changed.
-(rerunfilecheck)             Checksum: 70B18DC8EFDD3D300D3E1327D7911B22;296.
+(rerunfilecheck)             Checksum: 22E6EA17ADDE2DB64E2E1EAEC75C98D6;474.
  ) 
 Here is how much of TeX's memory you used:
- 33600 strings out of 474773
- 658848 string characters out of 5755059
- 1930842 words of memory out of 5000000
- 55111 multiletter control sequences out of 15000+600000
- 647360 words of font info for 108 fonts, out of 8000000 for 9000
+ 33679 strings out of 474773
+ 660438 string characters out of 5755059
+ 1935842 words of memory out of 5000000
+ 55185 multiletter control sequences out of 15000+600000
+ 650660 words of font info for 110 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 136i,12n,138p,648b,690s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 136i,12n,138p,648b,706s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on Section_1.pdf (1 page).
+Output written on Section_1.pdf (2 pages).
