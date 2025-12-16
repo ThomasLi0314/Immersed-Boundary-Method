@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  14 DEC 2025 10:26
+This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex 2024.10.2)  16 DEC 2025 12:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -909,27 +909,28 @@ Package: ulem 2019/11/18
 \c@solution=\count367
 \c@problem=\count368
 \c@property=\count369
-\c@definition=\count370
-\c@corollary=\count371
-\c@lemma=\count372
-\c@proposition=\count373
-\c@explanation=\count374
-\c@fact=\count375
-\c@remark=\count376
-\c@reminder=\count377
-\c@result=\count378
-\c@intu=\count379
-\c@solu=\count380
-\c@example=\count381
+\c@equations=\count370
+\c@definition=\count371
+\c@corollary=\count372
+\c@lemma=\count373
+\c@proposition=\count374
+\c@explanation=\count375
+\c@fact=\count376
+\c@remark=\count377
+\c@reminder=\count378
+\c@result=\count379
+\c@intu=\count380
+\c@solu=\count381
+\c@example=\count382
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2024/02/21 1.10 listings language file
 )
 \auth@toks=\toks59
 \affil@toks=\toks60
 \email@toks=\toks61
-\c@email@counter=\count382
+\c@email@counter=\count383
 \affiliationsSep=\skip80
-LaTeX Font Info:    Trying to load font information for OT1+phv on input line 759.
+LaTeX Font Info:    Trying to load font information for OT1+phv on input line 776.
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/psnfss/ot1phv.fd
 File: ot1phv.fd 2020/03/25 scalable font definitions for OT1/phv.
 ) (d:/Program Files/texlive/2024/texmf-dist/tex/latex/titlesec/titlesec.sty
@@ -947,9 +948,9 @@ Package: titlesec 2023/10/27 v2.16 Sectioning titles
 Package: subfiles 2020/11/14 v2.2 Multi-file projects (package)
 ) (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.sty
 Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
-\g__lipsum_par_int=\count383
-\l__lipsum_a_int=\count384
-\l__lipsum_b_int=\count385
+\g__lipsum_par_int=\count384
+\l__lipsum_a_int=\count385
+\l__lipsum_b_int=\count386
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (d:/Documents/Latex/Latex_Template/Custom_Commands.tex))) (./Section_1.aux)
 \openout1 = `Section_1.aux'.
 
@@ -1026,7 +1027,7 @@ Package caption Info: End \AtBeginDocument code.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-\c@lstlisting=\count386
+\c@lstlisting=\count387
 (d:/Program Files/texlive/2024/texmf-dist/tex/latex/pdflscape/pdflscape.sty
 Package: pdflscape 2022-10-27 v0.13 Display of landscape pages in PDF
  (d:/Program Files/texlive/2024/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
@@ -1097,10 +1098,10 @@ Package rerunfilecheck Info: File `Section_1.out' has not changed.
 (rerunfilecheck)             Checksum: 22E6EA17ADDE2DB64E2E1EAEC75C98D6;474.
  ) 
 Here is how much of TeX's memory you used:
- 33679 strings out of 474773
- 660438 string characters out of 5755059
+ 33710 strings out of 474773
+ 661246 string characters out of 5755059
  1935842 words of memory out of 5000000
- 55185 multiletter control sequences out of 15000+600000
+ 55216 multiletter control sequences out of 15000+600000
  650660 words of font info for 110 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  136i,12n,138p,648b,706s stack positions out of 10000i,1000n,20000p,200000b,200000s
