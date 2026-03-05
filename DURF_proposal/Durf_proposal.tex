@@ -1,0 +1,101 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=0.9in]{geometry}
+\usepackage{times}
+\usepackage{setspace}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\singlespacing
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+% ===== TITLE =====
+\begin{center}
+    {\large \textbf{Jinchang Li}} \\[4pt]
+    {\Large \textbf{An Immersed Boundary Method for Modeling\\
+    Nitric-Oxide-Induced Vasodilation in Cerebral Blood Vessels}}
+\end{center}
+
+% ===== ABSTRACT =====
+\section*{Abstract}
+
+Cerebral blood flow is regulated by vasomotor tone---the active dilation and constriction of vessel walls in response to biochemical signals such as nitric oxide (NO). This project develops and validates a 2D Immersed Boundary (IB) model for NO-induced vasodilation, coupling the vessel wall's elastic response to local biochemical forcing and calibrating the results against published experimental hemodynamic data. Using this model, we investigate how vasomotor tone variations modulate the periodic pulsatility of cerebral blood vessels, focusing on wall shear stress, velocity profiles, and vorticity distributions. A future extension to three dimensions is discussed as a natural next step. The results will advance computational understanding of cerebrovascular autoregulation and may offer insights relevant to stroke and vasospasm.
+
+% ===== RESEARCH QUESTION AND SIGNIFICANCE =====
+\section*{Research Question and Significance}
+
+\textbf{Research question:} How does nitric-oxide-induced vasodilation alter the pulsatile flow dynamics within cerebral blood vessels, and can an immersed boundary method faithfully capture the resulting fluid--structure interaction?
+
+Cerebrovascular disease is a leading cause of death and disability worldwide. Arterial walls actively dilate and constrict in response to metabolic demand---a process called \textit{vasomotor tone}. Nitric oxide (NO), released by endothelial cells, is a key mediator, triggering smooth-muscle relaxation and vessel dilation. When this regulation fails (endothelial dysfunction, vasospasm, or atherosclerotic plaque), the consequences include stroke and cognitive decline.
+
+Despite extensive clinical research, the detailed mechanics of how vasomotor tone variations interact with pulsatile blood flow remain computationally under-explored. Most models either treat vessel walls as rigid or use simplified 1D descriptions that miss phenomena such as secondary vortices and asymmetric wall shear stress. Moreover, many computational studies lack direct comparison with experimental hemodynamic measurements, limiting confidence in their predictive power.
+
+This project addresses these gaps by developing a comprehensive 2D fluid--structure interaction model of NO-induced vasodilation based on the Immersed Boundary Method (Peskin, 1972) and validating it against published experimental data on cerebral blood flow velocities and vessel diameters. The IB method couples an elastic, moving boundary with viscous fluid on a fixed Cartesian grid without body-fitted meshing, making it ideal for capturing the dynamic dilation--constriction cycle. A future extension to three dimensions is outlined as a natural continuation of this work.
+
+% ===== PROJECT DESIGN AND FEASIBILITY =====
+\section*{Project Design and Feasibility}
+
+\subsection*{Methodology}
+
+The project builds on a penalty Immersed Boundary (pIB) solver that I have developed and validated in MATLAB under the guidance of Prof.\ Guanhua Sun. The existing 2D solver features: (i)~an FFT-based projection method for the incompressible Navier--Stokes equations, (ii)~a 4-point discrete delta function for force spreading and velocity interpolation, (iii)~a penalty IB formulation with ghost-mass target points connected to material points by stiff springs ($K_{\mathrm{tar}}$) plus membrane springs ($K_{\mathrm{mem}}$). The summer research proceeds in four phases:
+
+\textbf{Phase 1: 2D Vasodilation \& Pulsatility Model} (Weeks 1--3). Extend the validated 2D Poiseuille-flow solver to incorporate NO-induced vasodilation by prescribing radial displacement of the ghost-mass target points $\mathbf{Y}$ as a function of local NO concentration. Implement pulsatile pressure-gradient forcing mimicking the cardiac cycle. Conduct parametric studies in 2D, varying NO dilation magnitude, wall stiffness ($K_{\mathrm{tar}}$, $K_{\mathrm{mem}}$), and pulsatile waveform parameters. Analyze time-resolved velocity profiles, wall shear stress, and vorticity fields.
+
+\textbf{Phase 2: Experimental Data Matching} (Weeks 4--6). Compare the 2D simulation results against published experimental measurements of cerebral blood flow, including transcranial Doppler velocity waveforms and vessel diameter changes from in-vivo studies. Calibrate model parameters (vessel stiffness, NO response magnitude, driving waveform shape) to achieve quantitative agreement with the experimental data. This validation step is critical for establishing the physical fidelity of the model.
+
+\textbf{Phase 3: Extended 2D Analysis \& Synthesis} (Weeks 7--9). Investigate more complex 2D scenarios: non-uniform vessel geometries, spatially varying NO concentrations, and multi-frequency pulsatile waveforms. Perform sensitivity analyses to identify the dominant parameters governing wall shear stress and flow pulsatility. Assess which modeling assumptions most influence predictive accuracy.
+
+\textbf{Phase 4: Documentation \& Future Directions} (Week 10). Compile results, prepare figures, and begin manuscript preparation. Outline the roadmap for a future 3D extension, including the necessary generalizations of the Eulerian grid, discrete delta function, FFT-based solver, and Lagrangian mesh to three dimensions.
+
+\subsection*{Week-by-Week Timeline}
+
+{\small
+\begin{tabular}{r p{12.5cm}}
+    \textbf{Wk 1} & Implement NO-driven ghost-point displacement in 2D; add pulsatile cardiac waveform forcing. \\
+    \textbf{Wk 2} & 2D parametric studies: vary dilation magnitude and wall stiffness; analyze velocity \& WSS. \\
+    \textbf{Wk 3} & 2D parametric studies: vary pulsatile frequency; compute vorticity fields and flow waveforms. \\
+    \textbf{Wk 4} & Literature survey of experimental cerebral hemodynamic data; set up comparison framework. \\
+    \textbf{Wk 5--6} & Calibrate 2D model parameters against experimental velocity and diameter measurements. \\
+    \textbf{Wk 7} & Investigate non-uniform vessel geometries and spatially varying NO concentrations. \\
+    \textbf{Wk 8} & Multi-frequency pulsatile waveform studies; sensitivity analysis of dominant parameters. \\
+    \textbf{Wk 9} & Finalize extended 2D analyses; assess modeling assumptions and predictive accuracy. \\
+    \textbf{Wk 10} & Compile results, prepare figures, outline 3D extension roadmap, begin manuscript. \\
+\end{tabular}
+}
+
+\subsection*{Feasibility}
+
+I will be in Shanghai for the full summer, dedicating 35--40~hours/week. MATLAB is available on university machines and my laptop; no special hardware is needed. Prof.\ Sun and I will continue weekly meetings. Building on the already-validated 2D solver de-risks the project: the focused 2D scope ensures a complete, publishable contribution comprising a vasodilation model, experimental validation, and extended parametric analysis, while laying the groundwork for a future 3D extension.
+
+% ===== BACKGROUND =====
+\section*{Background}
+
+I am a junior at NYU Shanghai majoring in Mathematics. Relevant coursework includes \textbf{Numerical Methods}, \textbf{Numerical Analysis}, \textbf{Partial Differential Equations}, \textbf{Ordinary Differential Equations}, and \textbf{Linear Algebra}, covering topics from finite-difference and spectral methods to PDE theory and stability analysis.
+
+Since Fall 2025, I have conducted independent research with Prof.\ Sun on the IB method: I implemented a complete 2D penalty IB solver from scratch in MATLAB, wrote detailed mathematical notes on the formulation (discrete delta functions, force spreading, stability constraints), and validated the solver against the Poiseuille flow analytical solution. I have also studied Peskin's original lectures and the penalty IB literature. This positions me well for the vasodilation problem and its future 3D extension.
+
+% ===== FEEDBACK AND EVALUATION =====
+\section*{Feedback and Evaluation}
+
+Professor Guanhua Sun (New York University Mathematics) will serve as my faculty mentor. We will hold weekly one-on-one meetings throughout the summer to review progress, discuss results, and troubleshoot technical issues. Professor Sun has extensive experience with immersed boundary methods and computational fluid dynamics during his career, having developed the reference 2D IB code that served as the foundation for my current implementation. 
+
+Evaluation criteria include:
+\begin{itemize}[nosep]
+    \item 2D vasodilation and pulsatility simulations producing physically consistent results (Week 3).
+    \item Quantitative agreement between 2D model predictions and published experimental data (Week 6).
+    \item Completion of extended 2D analyses with sensitivity and geometry studies (Week 9).
+    \item A well-documented codebase, a written summary of findings, and a 3D extension roadmap (Week 10).
+\end{itemize}
+
+% ===== DISSEMINATION =====
+\section*{Dissemination of Knowledge}
+
+I will present the results of this research at the NYU Shanghai Undergraduate Research Symposium, as required by the DURF program. The presentation will include animated 2D flow visualizations, quantitative velocity and vorticity comparisons with experimental data, and a discussion of the biomedical implications of our findings.
+
+In addition, the complete MATLAB codebase will be maintained in a version-controlled GitHub repository, making it available to other researchers working on immersed boundary methods and cardiovascular simulations. If the results are sufficiently novel and complete, Professor Sun and I plan to prepare a manuscript for submission to a computational mechanics or biofluid dynamics journal.
+
+\end{document}

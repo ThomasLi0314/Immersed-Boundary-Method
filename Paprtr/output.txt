@@ -1,0 +1,1826 @@
+JOURNAL OF COMPUTATIONAL PHYSICS 147, 402–440 (1998)
+ARTICLE NO. CP986097
+Modeling Arteriolar Flow and Mass Transport
+Using the Immersed Boundary Method
+Kayne M. Arthurs,∗Leon C. Moore,†Charles S. Peskin,‡
+E. Bruce Pitman,§ and H. E. Layton∗
+∗Department of Mathematics, Duke University, Durham, North Carolina 27708-0320;†Department
+of Physiology and Biophysics, State University of New York, Stony Brook, New York
+11794-8661;‡Courant Institute of Mathematical Sciences, New York University,
+New York, New York 10012;§Department of Mathematics, State University
+of New York, Buffalo, New York 14214-3093
+E-mail: ksmith@math.duke.edu, moore@physiology.pnb.sunysb.edu, peskin@cims.nyu.edu,
+pitman@sand.math.buffalo.edu, layton@math.duke.edu
+Received April 28, 1998; revised August 14, 1998
+Flow in arterioles is determined by a number of interacting factors, including per-
+fusion pressure, neural stimulation, vasoactive substances, the intrinsic contractility
+of arteriolar walls, and wall shear stress. We have developed a two-dimensional model
+of arteriolar ﬂuid ﬂow and mass transport. The model includes a phenomenological
+representation of the myogenic response of the arteriolar wall, in which an increase in
+perfusion pressure stimulates vasoconstriction. The model also includes the release,
+advection, diffusion, degradation, and dilatory action of nitric oxide (NO), a potent,
+but short-lived, vasodilatory agent. Parameters for the model were taken primarily
+from the experimental literature of the rat renal afferent arteriole. Solutions to the
+incompressible Navier-Stokes equations were approximated by means of a splitting
+that used upwind differencing for the inertial term and a spectral method for the
+viscous term and incompressibility condition. The immersed boundary method was
+used to include the forces arising from the arteriolar walls. The advection of NO was
+computed by means of a high-order ﬂux-corrected transport scheme; the diffusion
+of NO was computed by a spectral solver. Simulations demonstrated the efﬁcacy of
+the numerical methods employed, and grid reﬁnement studies conﬁrmed anticipated
+ﬁrst-order temporal convergence and demonstrated second-order spatial convergence
+in key quantities. By providing information about the effective width of the immersed
+boundary and sheer stress magnitude near that boundary, the grid reﬁnement studies
+indicate the degree of spatial reﬁnement required for quantitatively reliable simula-
+tions. Owing to the dominating effect of NO advection, relative to degradation and
+diffusion, simulations indicate that NO has the capacity to produce dilation along the
+entire length of the arteriole.
+c⃝1998 Academic Press
+402
+0021-9991/98 $25.00
+Copyright c⃝1998 by Academic Press
+All rights of reproduction in any form reserved.
+MODELING ARTERIOLAR FLOW 403
+Key Words:computational bioﬂuiddynamics; blood vessel; renal microvasculature;
+myogenic autoregulation; nitric oxide.
+1. INTRODUCTION
+The goals of this study are to formulate a detailed model for blood ﬂow and mass transport
+in an arteriole and to develop and evaluate a numerical algorithm for the solution of the
+model. The model and numerical algorithm rely heavily on the immersed boundary method
+(IMBM), which was originally developed to study ﬂuid motion in the heart [27].
+Arterioles have diameters ranging from about 10 to 200 µm and lengths ranging from
+100 to 1000 µm. Average ﬂow velocities are ∼1 cm/s, and pressure gradients along the
+direction of ﬂow are∼1000 mm Hg/cm. The Reynolds number of arteriolar ﬂow is typically
+about 0.1 (based on an arteriolar diameter of 20 µm and a kinematic blood viscosity of
+1.66×10
+−2cm2/s [1, 23]).
+Arteriolar walls consist of several outer layers of smooth muscle cells and an inner
+layer of endothelial cells. These endothelial cells can release vasoactive substances into
+the blood stream and into the arteriolar wall, where they can inﬂuence the adjacent smooth
+muscle cells. In this study, the arteriolar wall is modeled as a massless, elastic–contractile
+closed boundary immersed in a viscous, incompressible ﬂuid. The boundary is initially
+conﬁgured as parallel line segments with semi-circular closures at the ends (see Fig. 1).
+The ﬂuid region inside the boundary represents blood; the exterior ﬂuid region represents
+the local surroundings of the arteriole. Flow through the model arteriole is induced by a
+high-pressure ﬂuid source at one end and by a low-pressure ﬂuid sink at the opposite end.
+FIG. 1. The domain˜, with model conﬁguration, is shown at left. The initial position of the model arteriolar
+wall (dark heavy line) encloses the ﬂuid source (upper shaded square) and sink (lower shaded square), which have
+ﬁxed positions. The shaded vertical strip is the support of the external source/sink. An enlarged portion of ˜,a t
+right, shows the support of the source, relative to the Eulerian grid, and the individual nodes used in the numerical
+discretization of the arteriolar wall (see Section 3). Length scales are in micrometers.
+404 ARTHURS ET AL.
+Fluid velocities and pressures are determined by solving the incompressible Navier–Stokes
+equations, modiﬁed in accordance with the IMBM (see below). After pressurization, the
+model arteriole is approximately 20µm in diameter and 150 µm in length.
+The description of the boundary includes a phenomenological model of the myogenic
+response, in which an increase in intravascular pressure causes a contraction of vascular
+smooth muscle. This contraction reduces average arteriolar diameter, which increases total
+segmental resistance and thereby acts to stabilize downstream pressure [5]. In vivo, this
+contractile response is modulated by the local concentration of vasoactive agents, e.g., nitric
+oxide (NO), a potent vasodilator. The release of NO from the arteriolar wall is stimulated
+by shear stress [4] and by the binding of a number of other vasoactive substances [24].
+Alternatively, NO may be released as a consequence of vascular injury [18]. The arteriolar
+model includes provisions for the mass transport of NO, speciﬁcally, the release, advection,
+diffusion, degradation, and vasodilatory action of NO. Mathematical models have been
+developed by other investigators to examine the temporal evolution of NO in tissue [8, 22].
+Our model is distinguished by its emphasis on the detailed description of ﬂuid motion and
+coupled NO transport.
+The IMBM was used to model the interaction between the ﬂuid and the arteriolar wall
+by means of an immersed elastic–contractile boundary. The action of the boundary on the
+ﬂuid arises from a body force included in the Navier–Stokes equations. The boundary, as
+a consequence of the no-slip condition, is required to move at the local ﬂuid velocity. The
+IMBM has been used to simulate ﬂuid dynamics of the inner ear [2], bacterial swimming
+[9], bioﬁlm processes [10], peristaltic pumping of solid particles [11], sperm motility in the
+presence of boundaries [12], aquatic animal locomotion [13], platelet aggregation during
+blood clotting [14], suspended particles in three-dimensional Stokes ﬂow [15], and three-
+dimensional heart motion [29].
+The Navier–Stokes equations were solved by a tripartite splitting that is ﬁrst-order in time.
+The body force arising from the boundary was evaluated by an explicit differencing. The
+inertial term, which makes only a small contribution to the solution for low Reynolds number
+ﬂow, was evaluated by upwind differencing. The viscous term and the incompressibility
+condition were considered together in a backward Euler discretization of the time-dependent
+Stokes equations. These equations were then evaluated by a spectral method.
+The advection–diffusion equation for mass transport was also solved by a tripartite split-
+ting. Solute sources were evaluated by an explicit differencing. The advection term, which
+requires special care to avoid artifactual diffusion and dispersion, was evaluated by a ﬂux-
+corrected transport scheme that employs upwind-differencing for the low-order component
+and an eighth-order Richtmyer two-step Lax–Wendroff scheme for the high-order compo-
+nent. The diffusion term, represented by a backward Euler discretization, was evaluated by
+a spectral method.
+Simulation parameters are based on experimental measurements from the renal afferent
+arteriole of the rat. The afferent arteriole has been heavily studied because of its role in
+hemodynamic control, which is critical to the homeostatic function of the kidney and which
+protects delicate down-stream structures (e.g., the glomerulus) [32].
+Extensive tests were conducted to conﬁrm the accuracy and adequacy of the numeri-
+cal methods and to determine the degree of numerical resolution required for quantita-
+tively reliable simulations. In particular, tests were conducted to determine the effective
+immersed boundary width and the shear stress magnitude near the boundary. Simulations
+indicate that the model exhibits ﬁrst-order convergence in time and that key quantities exhibit
+MODELING ARTERIOLAR FLOW 405
+second-order convergence in space. Simulations also indicate that a spatial grid resolution
+of<1µm is required to adequately represent mass transport of NO.
+2. MODEL FORMULATION
+2.1. Fluid Equations and Immersed Boundary Method
+In this two-dimensional model, the arteriolar wall is modeled as an immersed boundary
+in a rectangular Eulerian ﬂuid domain ˜ with periodic boundary conditions. The domain
+˜, expressed in units of µm, is the set [0, 200] ×[0, 50]; position in ˜ will be denoted
+by x=(x, y), with the positivex-direction usually pointing downward in our ﬁgures (see
+Fig. 1). The ﬂuid is assumed to be incompressible with uniform densityρand uniform dy-
+namic viscosityµ. The immersed boundary is initially situated within˜ as shown in Fig. 1.
+The boundary conﬁguration at time t is given parametrically by X(s, t),−l/2≤s≤l/2,
+where X is a point in ˜, the parameter s marks a ﬁxed material point of the bound-
+ary, and l is the length of the unstressed boundary. Because the boundary is closed,
+X(−l/2, t)= X(l/2, t). The values= 0 corresponds to the point on the boundary having
+the largest x-coordinate. The parameter s increases with counterclockwise orientation.
+The Navier–Stokes equations, modiﬁed for our application, are given by
+ρ(∂t u+(u·∇)u)=−∇p+µ1u+ F−σκu, (1)
+∇·u= 0, (2)
+where u(x,t)is the ﬂuid velocity and p(x,t)is the ﬂuid pressure. The body forces that the
+immersed boundary imparts to the ﬂuid are included as an external force density F(x,t).
+To simulate the anatomical structures and interstitial matrix external to the arteriole, a
+damping term,σκu, proportional to the ﬂuid velocity and with constant damping coefﬁcient
+κhas been added to the Navier–Stokes equations. The dimensionless function σ(x, t)is
+constructed so that damping acts externally to the vessel; σis approximately one outside
+the model vessel and zero inside the vessel (see Eq. (31) below). The damping term, by
+reducing the velocity of ﬂow that is induced exterior to the model vessel (by expansion
+of the vessel), allows more rapid attainment of a near steady state. The divergence-free
+condition given by Eq. (2) applies over˜ except at ﬂuid sources or sinks (see below).
+The force density F(x,t), a Dirac delta-function layer along the immersed boundary, is
+given by
+F(x,t)=
+∫
+l/2
+−l/2
+f(s, t)δ(x−X(s, t))ds, (3)
+whereδis the two-dimensional Dirac delta function and f(s, t)is the density of the bound-
+ary force with respect to the measure ds . The boundary force density f(s, t)arises from
+the properties of the boundary and, therefore, is speciﬁc to the particular application of the
+method. To represent arteriolar walls, f(s, t)should include the elastic–contractile proper-
+ties of the smooth muscle sheath and its modulation by vasoactive agents.
+Because the immersed boundary moves with the ﬂuid, the equation of motion for the
+boundary, equivalent to the no-slip condition, is given by
+∂X(s, t)
+∂t = u(X(s, t),t)=
+∫
+˜
+u(x,t)δ(x−X(s, t))dx. (4)
+406 ARTHURS ET AL.
+The relationships set forth in Eqs. (3) and (4), which describe coupling between the boundary
+and the ﬂuid, are key features of the IMBM.
+To provide for ﬂuid ﬂow through the lumen of the model arteriole, a ﬂuid source is ﬁxed
+at the upper end of the model vessel and a sink is ﬁxed at the lower end; the support of the
+source and sink are illustrated in Fig. 1 as shaded squares. An external source/sink, located
+exterior to the model vessel, ensures the conservation of ﬂuid in˜; this external source/sink
+is illustrated in Fig. 1 as a shaded strip parallel to the x-axis.
+The locations and strengths of the external source/sink, the vessel source, and the vessel
+sink are speciﬁed by weighting functionsw
+m(x), withm= 0, 1, 2, respectively. Each func-
+tionwm is nonnegative and has weight one:
+∫
+˜wm(x)dx= 1. The functionsw1 andw2 are
+centered at the locations xS1=(18.75,31.25)and xS2=(181.25,31.25), respectively, and
+they have support contained in squares of side 6.25 µm. The external source/sink w0 has
+support in the rectangle [0, 200]×[3.125,9.375], which has centerlineyS0= 6.25µm. This
+centerline and the line y= 31.25 through the vessel source and sink are lines of symmetry
+in˜.
+The rate of ﬂow from sourcem that emerges from a point in˜ is the product of the weight
+wm(x)and the source ﬂow rate, given by qm(t). Since the external source/sink conserves
+ﬂuid volume,
+q0(t)=−
+2∑
+m= 1
+qm(t). (5)
+The incompressibility condition, Eq. (2), modiﬁed to include ﬂow from sources and sinks
+and taking Eq. (5) into account, is given by
+∇·u=
+2∑
+m=1
+qm(t)(wm(x)−w0(x)). (6)
+Note that
+∫
+˜
+∇·u dx=
+2∑
+m=1
+qm(t)
+∫
+˜
+(wm(x)−w0(x))dx= 0. (7)
+If this were not true, we would have a contradiction, because u is assumed to be a smooth
+periodic vector ﬁeld, and by the divergence theorem, the integral of∇·u over its period is
+zero.
+The ﬂow rates q1(t)and q2(t)are determined by assuming that short vessel segments,
+not in˜, are attached to the vessel’s source and sink. The pressure ¯P1 upstream from the
+source and the pressure ¯P2 downstream from the sink are speciﬁed as parameters, along
+with the resistances R1 and R2 in the corresponding segments. If one assumes that ﬂow in
+the short segments is approximated by Poiseuille ﬂow, the ﬂow rates q1(t)and q2(t)are
+given by the Hagen–Poiseuille equation,
+qm(t)=
+¯Pm−Pm(t)
+Rm
+, (8)
+where Pm(t)is the weighted average of the pressure over the source (or sink), scaled relative
+to the pressure over the external source/sink, i.e.,
+Pm(t)=
+∫
+˜
+p(x,t)(wm(x)−w0(x))dx, m= 1, 2. (9)
+MODELING ARTERIOLAR FLOW 407
+Once q1 and q2 are computed, q0 follows from Eq. (5). Although in this study the external
+pressures ¯Pm and resistances Rm are deﬁned to be constant, one may allow them to vary in
+time.
+2.2. Force Density Equations
+The force density exerted by the immersed boundary arises from the properties of the
+boundary. For the model arteriole, the boundary force densityf(s, t)has three components:
+(i) an elastic component f B(s, t)generated by tension in the boundary;
+(ii) a tether component f T(s, t)that arises from elastic connections between the boundary
+and speciﬁc points in˜; and
+(iii) an elastic–contractile component f M(s, t), which is typically nearly perpendicu-
+lar to the boundary and which depends on the local intravascular pressure and the local
+concentrations of vasoactive substances.
+The component of force density generated by tension in the boundary is given by
+f B= ∂(BτB)
+∂s , (10)
+where the tension B, which arises from boundary strain at all points along the boundary, is
+given by a continuous version of Hooke’s law with spring constant KB :
+B(s, t)= KB
+(⏐⏐
+⏐
+⏐
+∂X(s, t)
+∂s
+⏐
+⏐
+⏐
+⏐−1
+)
+. (11)
+The direction of B is given by the unit tangent vector
+τ
+B(s, t)=
+(∂X(s, t)
+∂s
+)/⏐
+⏐
+⏐
+⏐
+∂X(s, t)
+∂s
+⏐
+⏐
+⏐
+⏐. (12)
+Tethers are used to stabilize the model arteriole in ˜, much as surrounding structures
+and connective tissue stabilize arterioles in vivo. In the absence of tethers, the expansion of
+the model vessel, upon pressurization, excites currents that cause the vessel to translate in
+the ﬂuid domain. Since the formulation and solution of the model is simpler with sources
+that remain ﬁxed in ˜, tethers serve the practical purpose of keeping the vessel nearly
+translation-free.
+A tether is constructed as an elastic component connecting a material point s
+′on the
+boundary to a ﬁxed anchor pointxT in˜; the elastic component may be allowed to expand
+to a given length LT before a restoring force is activated. The force density arising from a
+single tether is given by
+f T(s, t)= KT max{0,(|xT−X(s,t)|−LT)}δ(s−s′)τT(s, t), (13)
+where the unit vectorτT is given by
+τT(s, t)=
+
+
+
+xT−X(s, t)
+|xT−X(s, t)|, xT ̸=X(s, t),
+0, xT = X(s, t).
+(14)
+408 ARTHURS ET AL.
+TABLE I
+Initial Coordinates of Tether Attachments to Nodes (µ m)
+Tether xy s
+T1 10.937500000000 31.250000000000 ± l/2
+T2 10.977602212310 30.638158473969 −l/2+ l1/12
+T3 10.977602212310 31.861841526031 +l/2−l1/12
+T4 11.097222689270 30.036785726082 −l/2+ l1/6
+T5 11.097222689270 32.463214273918 +l/2−l1/6
+T6 15.625000000000 26.562500000000 −l2−l1
+T7 15.625000000000 35.937500000000 +l2+ l1
+T8 184.37500000000 26.562500000000 −l1
+T9 184.37500000000 35.937500000000 +l1
+T10 189.06250000000 31.250000000000 0
+Note. Here, l= 4l1+ 2l2, with l1=(600/64)(π/4)and l2= 108(100/64)= 168.75. The
+total length of the unstressed boundary is given by l;2 l1 is the length of the upper or lower
+unstressed semi-circle; l2 is the unstressed length of the straight portion of a side. Each
+Lagrangian attachment point s remains ﬁxed in time, but its Eulerian coordinate will evolve
+with the motion of the boundary.
+The Dirac delta function in Eq. (13), with support at s′, speciﬁes that the tether force acts
+at s′.
+Ten tethers of the type that have just been described are connected to the immersed
+boundary that forms the model arteriole wall; their points of attachment to the boundary are
+given in Table I, and their anchor points are given in Table II. Tether placement is shown in
+Fig. 2. Five tethers with zero rest length (L
+T= 0), labeled T1–T5, anchor the model arteriole
+above the ﬂuid source. Four additional tethers, labeled T6–T9, are attached to the ends of
+the initially straight sections of the boundary, and a tenth, T10, is attached to the base of the
+boundary. For these tethers,L
+T= 200/256µm, which allows the model arteriole to expand
+and lengthen before a stabilizing force is applied.
+The elastic–contractile component of force density, given by
+f M(s, t)= M(s, t)τM(s, t), (15)
+TABLE II
+Tether Anchor Locations (µ m)
+Tether x y
+T1 10.937500000000 31.250000000000
+T2 10.977602212310 30.638158473969
+T3 10.977602212310 31.861841526031
+T4 11.097222689270 30.036785726082
+T5 11.097222689270 32.463214273918
+T6 15.625000000000 25.781250000000
+T7 15.625000000000 36.718750000000
+T8 184.37500000000 25.781250000000
+T9 184.37500000000 36.718750000000
+T10 189.84375000000 31.250000000000
+MODELING ARTERIOLAR FLOW 409
+FIG. 2. At left is a schematic representation of the discretized boundary, with a reduced number of nodes. The
+lines between nodes indicate node connectivity. Tethers connect some nodes to ﬁxed anchor points on˜; anchor
+points are indicated by an×. The enlargement at right provides a schematic representation of the elastic-contractile
+elements (EC) that connect opposing nodes and the purely elastic elements that connect adjacent nodes. Boundary
+nodes are indexed on the right side of the boundary by odd integers and on the left by even integers.
+contains the myogenic response of the vessel and largely determines arteriolar diameter. The
+form of M(s, t)depends on the particular type of arteriole, and later, in Section 4, a speciﬁc
+formulation is developed for the renal afferent arteriole. However, in general, the myogenic
+force density at a material points on the boundary is assumed to depend on the intravascular
+pressure P(s, t)at the centerline of the model arteriole and on the concentration of a
+vasoactive substance at the boundary. SinceX(s, t)and X(−s, t)are symmetric points with
+respect to the vessel centerline, the centerline is given byG(s, t)=(X(s, t)+ X(−s, t))/2,
+and P(s, t)is given by
+P(s, t)=
+∫
+˜
+p(x,t)(δ(x−G(s, t))−w0(x))dx. (16)
+This pressure, which is measured relative to the external source/sink pressure, is a good
+approximation to the transmural pressure since the pressure everywhere external to the
+model arteriole is nearly equal to the external source/sink pressure. Ifc(x,t)is the vasoactive
+substance concentration deﬁned on˜, then the concentration at a site s on the boundary is
+c(X(s, t),t)=
+∫
+˜
+c(x,t)δ(x−X(s,t))dx. (17)
+The myogenic force is applied along the sides of the model arteriole between the attachment
+points of tethers T6 and T8 and tethers T7 and T9. The myogenic force acts in the direction
+of the model arteriole centerline, given by
+τ
+M(s, t)= X(−s, t)−X(s, t)
+|X(−s, t)−X(s, t)|. (18)
+410 ARTHURS ET AL.
+The total force density at a general material points along the boundary at time t is given
+by
+f(s, t)= f B(s, t)+ f T(s, t)+ f M(s, t). (19)
+2.3. Mass Transport Equations
+The advection and diffusion of solute dissolved in the ﬂuid is coupled to the ﬂuid velocity
+u. The advection–diffusion equation, including the effects of both ﬂuid and solute sources
+[31], is given for a solute of concentration c(x,t)by
+ct+∇·(uc)=∇·(D∇c)+ QS, (20)
+where D(x)is solute diffusivity and QS(x,t)represents solute sources. For this study
+QS(x,t)= so(x,t)−a(x,t)c(x,t)−
+2∑
+m=1
+cm(x,t)qm(t)wm(x), (21)
+where the ﬁrst term on the right in Eq. (21) represents the rate of release of solute from
+a site in ˜, perhaps from the vessel wall; the second term represents the degradation of
+solute in the domain by chemical reactions; and the third term represents the addition or
+removal of solute by ﬂuid entry or exit at the ﬂuid sources within the model vessel. The
+rate of degradation, which is assumed to have ﬁrst-order kinetics, may depend on the local
+structures, and therefore is characterized by a nonnegative coefﬁcienta(x,t)that may vary
+in space and time. The concentration c
+m(x,t)equals c(x,t)for exiting ﬂow (qm(t)≤0),
+however cm(x,t)must be speciﬁed for entering ﬂow ( qm(t)>0). No solute is allowed to
+enter or leave the ﬂuid domain by way of the external source/sink.
+3. NUMERICAL METHODS
+A computational grid is placed on ˜ by deﬁning grid points xij =(xi, yj)=(ih, jh),
+where i= 0, 1, 2,..., 4J−1; j=0,1,2,..., J−1; andh= L/ J (in our case, L is
+50 µm). Time is discretized in steps of 1t. The analytical solution at each grid point
+(i.e., u(xij, n1t)) is approximated by a numerical solution un
+ij ; the same convention is
+applied to other variables—hence, e.g., pn
+ij , Fn
+ij , and cn
+ij .
+The material points of the immersed boundary are discretized by conceptualizing the
+boundary as N Lagrangian boundary nodes, denoted by sk for k= 1, 2,..., N. The nodes
+are conﬁgured, however, so that the ﬁrst node is at the distal end of the model vessel
+(coinciding with s= 0), with even-numbered nodes increasing along the left side and
+odd-numbered nodes increasing along the right side. The location of boundary node s
+k at
+time n1t is given by Xn
+k . In the unstressed conﬁguration (at t= 0), adjoining nodes along
+the boundary (e.g., sk and sk+2 ) are separated by distance 1sk± =|X0
+k± 2−X0
+k|. Along the
+sides of the model arteriole1sk± = h/2; along the semicircular ends of the vessel, the nodal
+points are initially separated by the arc-length distance πh/8, as in Fig. 1. The length of
+the unstressed boundary segment associated with node sk is1sk=(1sk++1sk−)/2.
+An approximation δh(x)to the two-dimensional Dirac delta function δ(x), which is
+needed, e.g., in Eqs. (3) and (4), is given by Peskin and McQueen [29] as
+δh(x)= h−2φ(x/ h)φ(y/ h), (22)
+MODELING ARTERIOLAR FLOW 411
+where the one-dimensional approximate Dirac delta functionφ(r)is given by
+φ(r)=
+
+
+
+
+
+1
+8(3−2|r|+
+√
+1+4|r|−4r2),|r|≤1,
+1
+2−φ(2−|r|), 1≤|r|≤2,
+0, |r|≥2.
+(23)
+This formulation of an approximate delta function has properties that are particularly ap-
+propriate for use in the IMBM [29].
+The approximate delta function is also used to describe the source weighting functions.
+The discretization ofwm(x)is given bywm(xij)=δho(xij −xSm), where xSm is the center
+of the source or sink form= 1, 2 and ho is the coarsest grid spacing, which is (50/32)µm.
+(Note that the parameterho is ﬁxed so that the physical sizes of the source, sink, and external
+source/sink are maintained when the space discretization is varied.) The weighting function
+over the external source/sink,w
+0(x), is discretized as the one-dimensional approximation to
+the Dirac delta function, normalized to have weight one; it is given byφ((yi−yS0)/ho)/200.
+At time n1t, the node locations Xn
+k , ﬂuid velocity un
+ij , and solute concentration cn
+ij
+are assumed known. The updated dependent variables ( un+1
+ij , pn+1
+ij , cn+1
+ij , and Xn+1
+k ) are
+computed by a ﬁrst-order splitting in time, which may be summarized in four steps:
+1. Compute the boundary force density f n
+k at each node sk and spread this force density
+to the grid via the approximate delta functionδh(xij)to obtain the corresponding grid force
+density Fn
+ij .
+2. Using the grid force density Fn
+ij , solve the discretized Navier–Stokes equations to
+obtain the updated ﬂuid velocity un+1
+ij and pressure pn+1
+ij .
+3. Use interpolation via the approximate delta function δh(xij)to determine the bound-
+ary node ﬂuid velocity Un+1
+k from the nearby grid velocities un+1
+ij ; move each node at the
+velocity Un+1
+k to obtain the updated boundary node conﬁguration Xn+1
+k .
+4. Compute the updated solute concentration cn+1
+ij by advection with the ﬂuid velocity
+un+1
+ij ; include solute diffusion and solute sources.
+Each step will now be described in detail.
+3.1. Force Determination
+The boundary force component is given by a centered-difference discretization of
+Eqs. (10)–(12),
+(f B)n
+k = KB
+1sk
+[(⏐⏐
+⏐
+⏐
+1X
+n
+k+
+1sk+
+⏐⏐
+⏐
+⏐−1
+)
+(τ
+B)n
+k+−
+(⏐⏐
+⏐
+⏐
+1X
+n
+k−
+1sk−
+⏐⏐
+⏐
+⏐−1
+)
+(τ
+B)n
+k−
+]
+, (24)
+where1Xn
+k+= Xn
+k+2
+−Xn
+k
+,1Xn
+k−
+= Xn
+k
+−Xn
+k−2
+, and(τB)n
+k± = 1Xn
+k±/|1Xn
+k±
+|.
+For simplicity, each tether will be constructed to always act at a particular node. If
+a tether (ﬁxed to a point xT ) is attached to a node Xn
+k
+(corresponding to the parametric
+location s′= sk ), then the tether force density (c.f. Eqs. (13)–(14)) is given by
+(f T)n
+k = KT
+1sk
+max
+{
+0,
+(⏐⏐xT−Xn
+k
+⏐⏐)
+−(LT)k
+}
+(τT)n
+k, (25)
+where the unit vector(τT)n
+k for xT ̸=Xn
+k is given by
+(τT)n
+k = xT−Xn
+k⏐⏐xT−Xn
+k
+⏐⏐. (26)
+412 ARTHURS ET AL.
+The myogenic component of the force density (f M)n
+k on node sk depends on the ap-
+proximate pressure Pn
+k and approximate concentration cn
+k (corresponding to P(sk, n1t)
+and c(X(sk, t),n1t), respectively). The expression approximating the transmural pressure
+(Eq. (16)) is discretized as
+Pn
+k = h2∑
+ij
+pn
+ij
+(
+δh
+(
+xij −Gn
+k
+)
+−w0(xij)
+)
+. (27)
+The concentration at the boundary is computed by
+cn
+k = h2∑
+ij
+cn
+ijδh
+(
+xij −Xn
+k
+)
+. (28)
+Because of the symmetry of our labeling convention, the nodes labeled k and k+ 1, for
+even k, are located at the same x-location on opposite sides of the model arteriole; thus,
+Pn
+k = Pn
+k+1 , Gn
+k= Gn
+k+1
+=(Xn
+k
++ Xn
+k+1
+)/2, and(f M)n
+k+1=−(fM)n
+k .
+Once the force density component at each node has been computed, the total force density
+at time index n and node sk is given by fn
+k=(f B)n
+k+(f T)n
+k
++(f M)n
+k
+. This force density is
+transferred to the nearby grid points by the discretized version of Eq. (3):
+Fn
+ij =
+∑
+k
+fn
+kδh
+(
+xij −Xn
+k
+)
+1sk. (29)
+3.2. Fluid Equations
+The updated ﬂuid velocity is computed in a tripartite splitting that is similar to that
+described in Ref. [29]. However, here we use a spectral method to evaluate the contributions
+of the viscous and incompressibility terms, i.e., we apply the continuous Fourier transform,
+evaluate unknown quantities algebraically in transform space, and then use the discrete
+Fourier transform (DFT) to return to physical space. In Ref. [29], the same terms are ﬁrst
+discretized in physical space, and the DFT is then used to solve the discretized equations.
+The sources and sinks are handled much as in Ref. [27].
+In the tripartite splitting, two provisional values,u
+n+1,1
+ij and un+1,2
+ij , are calculated before
+un+1
+ij is ﬁnally determined. The ﬁrst provisional value includes contributions from the force
+density F, computed by an explicit forward Euler step, and from the damping term−σκu,
+computed by an implicit backward Euler step, yielding
+un+1,1
+ij =
+un
+ij +(1t/ρ)Fn
+ij
+1+(1t/ρ)κσn
+ij
+. (30)
+The values ofσn
+ij are obtained fromσ, a linear superposition of hyperbolic tangent functions
+constructed to give a value of approximately one outside the vessel and zero inside. Along
+the gridlines x
+i that intersect the boundary,σn
+ij is given by
+σn
+ij = σ(xi, yj, n1t)
+= 1−1
+2
+[
+tanh
+(
+0.8
+(
+yj−
+(
+yn
+ibl −2ho
+)))
++ tanh
+(
+0.8
+(
+yj−
+(
+yn
+ibr + 2ho
+)))]
+, (31)
+where yn
+ibl and yn
+ibr are the left and right y-coordinates of the intersection of x= xi with
+the immersed boundary, respectively, at timen1t. For gridlines xi that do not intersect the
+MODELING ARTERIOLAR FLOW 413
+immersed boundary,σ= 1. With this speciﬁcation ofσ,σn
+ij ≈0.001 at a distanceho/2 inside
+the boundary, andσn
+ij is orders of magnitude smaller for points further inside the boundary.
+At a distance 4ho outside the boundary,σn
+ij exceeds 0.99, andσn
+ij rapidly approaches 1 as
+the distance from the boundary increases.
+The second provisional value un+1,2
+ij =(un+1,2
+ij ,v n+1,2
+ij ), which includes the contribution
+of the advection term(u·∇)u, is obtained from un+1
+ij by an upwind differencing,
+un+1,2
+ij = un+1,1
+ij −1t
+h
+[(
+u+
+(
+un+1,1
+ij −un+1,1
+i−1, j
+)
++ u−
+(
+un+1,1
+i+1, j −un+1,1
+ij
+))
++
+(
+v+
+(
+un+1,1
+ij −un+1,1
+i, j−1
+)
++v−
+(
+un+1,1
+i, j+1 −un+1,1
+ij
+))]
+, (32)
+vn+1,2
+ij = vn+1,1
+ij −1t
+h
+[(
+u+
+(
+vn+1,1
+ij −vn+1,1
+i−1, j
+)
++ u−
+(
+vn+1,1
+i+1, j −vn+1,1
+ij
+))
++
+(
+v+
+(
+vn+1,1
+ij −vn+1,1
+i, j−1
+)
++v−
+(
+vn+1,1
+i, j+1 −vn+1,1
+ij
+))]
+, (33)
+where u± =± max{0,±u n
+ij}andv± =± max{0,±v n
+ij}.
+In the third and ﬁnal step of the splitting, discretized forms of the equations
+ρ∂t u=−∇p+µ1u, (34)
+∇·u=
+2∑
+m=1
+qm(t)(wm(x)−w0(x)) (6)
+are solved simultaneously for the updated ﬂuid velocity un+1
+ij and pressure pn+1
+ij .T oi n -
+corporate the ﬂuid sources, the ﬂuid velocity and pressure are written as a superposition
+of a solution without ﬂuid sources plus terms that include each source independently. For
+simplicity in the derivation of the appropriate equations, we will use equations that are
+continuous in space but discretized in time. Thus we will write the second provisional value
+u
+n+1,2
+ij as un+1,2(x), and we will write the time-advanced ﬂuid velocityun+1
+ij and pressure
+pn+1
+ij as u(x)and p(x), respectively.
+Now using superposition, we assume that
+u(x)= ˜u(x)+
+2∑
+m=1
+bm(x)qn+1
+m (35)
+and
+p(x)= ˜p(x)+
+2∑
+m=1
+rm(x)qn+1
+m , (36)
+where the terms arising in the absence of sources, ˜u(x)and ˜p(x), satisfy
+ρ
+( ˜u(x)−un+1,2(x)
+1t
+)
+=−∇˜p(x)+µ1 ˜u(x), (37)
+∇·˜u(x)= 0, (38)
+and the terms on the far right in Eqs. (35) and (36) represent contributions from the sources.
+414 ARTHURS ET AL.
+The effects of the external source/sink ( m= 0) are implicitly included in these equations
+through volume conservation in˜.
+If we substitute Eqs. (35) and (36) into Eq. (6) and into the time-discretized version
+of Eq. (34), and if we take into account, that, by assumption, ˜u(x,t)and ˜p(x,t)satisfy
+Eqs. (37) and (38), we ﬁnd that qn+1
+m , bm(x), andrm(x)must satisfy
+2∑
+m=1
+qn+1
+m
+[
+ρbm(x)
+1t +∇rm(x)−µ1bm(x)
+]
+= 0, (39)
+2∑
+m=1
+qn+1
+m [∇·bm(x)−(wm(x)−w0(x))]= 0. (40)
+Because the source magnitudes are independent of the ﬂow vectorbm , the terms within the
+square brackets in Eqs. (39) and (40) must vanish for each m. Therefore, bm(x)and rm(x)
+must satisfy
+ρ
+(bm(x)−0
+1t
+)
+=−∇rm(x)+µ1b m(x), (41)
+∇·bm(x)= wm(x)−w0(x). (42)
+Thus the unknowns bm(x),rm(x),˜u(x),and ˜p(x), in Eqs. (37), (38), (41), and (42), can
+all be found by solving a system of the form
+ρ
+(u−w
+1t
+)
+=−∇p+µ1u, (43)
+∇·u= S(x), (44)
+where w and S(x)are given. Moreover, sincebm(x)and rm(x)depend only on ﬁxed source
+locations and the time step1t, Eqs. (41) and (42) need be solved only once.
+Equations (43) and (44) may be solved by means of the Fourier transform, which, for a
+scalar function g on the ﬁnite domain [0, 4L]×[0, L], is given by
+ˆg(kx, ky)=
+∫L
+0
+∫4L
+0
+exp{−i(2π/L)[kx(x/4)+ ky y]}g(x, y)dx dy. (45)
+Using this deﬁnition, the transform of the scalar form of Eqs. (43) and (44) is given by
+ρ
+( ˆu−ˆw
+1t
+)
+=−k1 ˆp+µ k2 ˆu, (46)
+ρ
+( ˆv−ˆz
+1t
+)
+=−k2 ˆp+µ k2 ˆv, (47)
+(k1 ˆu+ k2 ˆv)= ˆS, (48)
+where u=(u,v), w=(w,z),(k1, k2)=−i(2π/L)(kx/4, ky), andk2= k2
+1+ k2
+2 . Solving this
+MODELING ARTERIOLAR FLOW 415
+system for ˆp, one obtains
+ˆp= k1 ˆw+ k2 ˆz−(1−(µ1t/ρ)k2)ˆS
+(1t/ρ)k2 . (49)
+Solving for ˆu and ˆv gives
+ˆu= ˆw−(1t/ρ)k1 ˆp
+1−(µ1t/ρ)k2 , (50)
+ˆv= ˆz−(1t/ρ)k2 ˆp
+1−(µ1t/ρ)k2. (51)
+Since ˆp depends only on ˆw and ˆS, and ˆu depends only on ˆw and ˆp, u and p can be determined
+by inverse transforming Eqs. (49), (50), and (51). Note thatˆp is undeﬁned whenk1= k2= 0;
+we set ˆp(0,0)= 0. This choice has no effect on the transformed velocities computed in
+Eqs. (50) and (51).
+In our numerical realization of this solution method for Eqs. (43) and (44), we ﬁrst
+compute, by means of the fast Fourier transform (FFT) [3, 30], the discrete Fourier transform
+(DFT) of wij and of Sij . (Recall that the identities of w and S depend on which set of
+unknowns is being solved for:(b1, r1),(b2, r2),o r(˜u, ˜p); see Eqs. (37), (38), (41), and (42).)
+Then a discretized ˆp is determined from Eq. (49), and discretized ˆu and ˆv are determined
+from Eqs. (50) and (51), respectively. Finally, the FFT is used to compute the inverse DFTs
+of these variables, i.e., to compute p
+ij and uij .
+We now show how to compute the source ﬂow ratesqn+1
+1 and qn+1
+2 for use in Eqs. (35) and
+(36). If Eq. (36) is substituted into Eq. (9), and the resulting expression forPm is substituted
+into Eq. (8), and if the resulting expression is written in discretized form, one obtains
+qn+1
+m Rm+ h2
+2∑
+k=1
+∑
+ij
+rk,ij qn+1
+k (wm(xij)−w0(xij))
+= ¯Pm−h2∑
+ij
+˜pn+1
+ij (wm(xij)−w0(xij)), (52)
+which is equivalent to a linear system of the form
+AQ n+1= Bn+1, (53)
+where
+Qn+1
+m = qn+1
+m , m= 1, 2,
+Bn+1
+m = ¯Pm−h2∑
+ij
+˜pn+1
+ij (wm(xij)−w0(xij)), m= 1, 2, (54)
+Amk = Rmδmk+ h2∑
+ij
+rk,ij(wm(xij)−w0(xij)),m= 1, 2; k= 1, 2,
+andδmk is the Kronecker delta. Since ˜pn
+ij and rm,ij have already been computed, this system
+may be readily solved for Qn+1 .
+416 ARTHURS ET AL.
+Now, since˜un
+ij , ˜pn+1
+ij , bm,ij , rm,ij , andqn+1
+m are known, the updated velocityun+1
+ij and pres-
+sure pn+1
+ij may be computed from the discretized versions of Eqs. (35) and (36), given by
+un+1
+ij = ˜un
+ij +
+2∑
+m= 1
+bm,ij qn+1
+m (55)
+and
+pn+1
+ij = ˜pn+1
+ij +
+2∑
+m= 1
+rm,ij qn+1
+m . (56)
+So that the pressure displayed in the ﬁgures would be compatible with experimental usage,
+the pressure computed through Eq. (56) was translated so that the average exterior pressure
+is near zero and the interior pressure approximates the transmural pressure. The translation
+was effected by averaging the pressure over the generalized source/sink and subtracting
+that average from the pressure computed in Eq. (56). The resulting pressure exterior to the
+vessel falls between−1 and 1 mm Hg. The translated pressures are used in the ﬁgures.
+3.3. Boundary Nodes
+The local ﬂuid velocity at node X
+n
+k is computed by interpolation from the velocity at
+nearby grid points; thus
+Un+1
+k = h2∑
+ij
+un
+ijδh
+(
+xij −Xn
+k
+)
+. (57)
+The boundary node location is then updated by a forward difference, given by
+Xn+1
+k = Xn
+k
++1tUn+1
+k , (58)
+the discretized version of Eq. (4).
+3.4. Solute
+The solute equation, Eq. (20), is solved by a tripartite splitting. The advection step,
+ct+∇·(uc)= 0, is solved using a multidimensional ﬂux-corrected transport (FCT) method,
+with an eighth-order Richtmyer two-step Lax–Wendroff scheme as the high-order scheme
+and upwind differencing as the low-order scheme [37]. Zalesak has shown that this method
+provides good shape preservation when applied to the linear advection problem [38].
+The diffusion step, c
+t=∇·(D(x)∇c),may be solved using backward-time, centered-
+in-space differencing, and an iterative scheme, e.g., Richardson iteration [20]. However, in
+the computational examples presented below,D is assumed to be constant, so the system is
+easily solved by means of the Fourier transform. Thus, if c
+n+1,1 is the concentration com-
+puted by the advection step, the second provisional concentration,cn+1,2 , may be computed
+by the backward difference
+cn+1,2(x)−cn+1,1(x)
+1t = D1cn+1,2(x). (59)
+This equation may be Fourier transformed in space (using Eq. (45)), solved for ˆcn+1,2 , and
+inverse transformed to obtain cn+1,2 . In practice, the discrete transforms are computed by
+means of the FFT.
+Finally, the solute source step, expressed as ct= QS, is solved by the forward Euler
+method to obtain cn+1
+ij .
+MODELING ARTERIOLAR FLOW 417
+4. AFFERENT ARTERIOLE
+Thus far, the model has been described in general terms for application to a generic
+arteriole. However, in numerical simulations, we will represent an afferent arteriole in the
+kidney of a rat. A typical rat afferent arteriole is approximately 20 µm in diameter and is
+100–300µm in length. Flow in the afferent arteriole is regulated in large measure by the
+myogenic response of the walls and by vasoactive substances that modulate the contrac-
+tility of vascular smooth muscle. The model afferent arteriole developed here includes the
+myogenic response and the action of the vasodilator nitric oxide (NO), which is released by
+the endothelial and smooth muscle cells that make up the vessel wall and which undergoes
+advection, diffusion, and degradation in the ﬂuid ﬂow.
+Two aspects of the myogenic response will be included in the myogenic force density
+component f
+M(s, t): a steady-state response that reduces vessel diameter as steady-state
+perfusion pressure increases (see Fig. 3), and a transient response to an increase in perfusion
+pressure that initially allows the vessel diameter to increase elastically, but subsequently
+initiates a muscular contraction, leading to a decrease in vessel diameter (see Fig. 4).
+The myogenic response was computed from a phenomenological model in which the
+magnitude of the myogenic force component is given by
+M(s, t)= K
+M(s, t)D(s, t)
+D0
++γ∂t D(s, t)
+D0
+, (60)
+where D(s, t)=|X(s,t)−X(−s,t)|is vessel diameter,KM(s, t)is a myogenic force coefﬁ-
+cient,γis a constant coefﬁcient of viscosity, andD0 is a reference diameter. Equation (60) is
+based on the V oigt model for a viscoelastic material; the ﬁrst term is suggested by Laplace’s
+law and the second term represents the viscous response of the tissue [16].
+The coefﬁcient K
+M(s, t)is constructed as a linear combination of a coefﬁcient Ka(s, t)
+for fully active myogenic response and a coefﬁcientK p(s, t)for a fully passive (i.e., elastic)
+vessel,
+KM = (Ka−K p)(1−r)+ K p, (61)
+where r depends on the concentration of NO along the vessel wall, c(X(s, t),t). The fully
+active myogenic coefﬁcient is the solution of a second-order differential equation that
+permits a transient response,
+b
+3∂2
+t Ka+ b2∂t Ka+ b1(s, t)Ka= P(s, t), (62)
+where P(s, t)is the transmural pressure.
+The coefﬁcient b1, which models the steady-state response, is given by
+b1(P(s, t))= 22−d(s)(P(s, t)−50)
+D0
+, (63)
+where d(s)increases along the active portion of the model arteriole. Speciﬁcally, as s
+varies from the attachment point of tether T6 to the attachment point of T8, d(s)increases
+linearly from a value of 0.1 to a value of 0.3. Because intravascular pressure decreases
+along the ﬂow direction, the scaling provided byd(s)is necessary for the model arteriole to
+maintain a nearly constant diameter along its length, as do afferent arterioles in vivo. From
+this result one may reasonably hypothesize that the myogenic response in vivo is spatially
+inhomogeneous.
+418 ARTHURS ET AL.
+FIG. 3. Comparison of steady-state myogenic responses based on our simulations (upper panel) with experi-
+mental responses from a rat afferent arteriole (lower panel). In each panel, arteriolar diameter is given as a function
+of pressure (simulation feed pressure ¯P1 slightly exceeds simulation perfusion pressure). Also, in each panel, the
+dashed line represents the passive arteriolar dilation resulting when the myogenic response has been disabled, and
+the solid line represents myogenic contraction. The upper panel shows the average diameter between x= 50 and
+150µm for quasi-steady-state ﬂows with spatial grid reﬁnement h
+o/2 (see Section 5). The lower panel shows the
+response of rat afferent arterioles at mid-length, as feed pressure increases from 60 to 140 mm Hg. (Experimental
+data is from published work of Casellas and Moore [6]).
+The coefﬁcientsγ, b2, and b3, which are required for a description of the dynamic re-
+sponse, were obtained as follows. Equations (60) and (62) were considered to be independent
+of s, d(s)in Eq. (63) was set to 0.1, and a pressure P(t)= 60+ 40(1−exp−1.12t)mm Hg
+was prescribed. This pressure was converted into units of force to obtain M(t)in Eq. (60),
+and the equations were solved for the resulting diameter D(t), using trial values of the un-
+known coefﬁcients. Values for the coefﬁcients were determined, by means of a least-squares
+algorithm, so that the time course of the diameter closely approximated previously unpub-
+lished experimental data from the laboratory of Leon Moore. The coefﬁcients so obtained
+are given in Table III. Figure 4 shows the experimental values for arteriolar diameter, the so-
+lution obtained from the model when Eqs. (60) and (62) were solved as just described using
+the coefﬁcients in Table III, and the diameter obtained for the full simulation, incorporating
+Eqs. (60), (62), and (63). In the full simulation, P(s, t)was computed through the ﬂuid
+MODELING ARTERIOLAR FLOW 419
+FIG. 4. Comparison of transient myogenic response for a rat afferent arteriole, the phenomenological model
+of the myogenic response, and the full simulation. Solid line denotes rat afferent arteriolar response when perfusion
+pressure was increased from 60 to 100 mm Hg. Experimental time (in seconds) is shown across the top of the
+diagram. The wide gray line shows the model diameter computed through Eqs. (60) and (62) to determine the
+dynamic coefﬁcients (see text). The dashed line shows the response of the simulation atx≈50µm for the spatial
+grid reﬁnement h
+o/2, after the feed pressure was increased stepwise from 80 to 120 mm Hg. The time axis for the
+simulation is shown at the bottom of the ﬁgure; the time scale for the simulation was increased by a factor of 175
+(by scaling the speed of the myogenic response) so that physiological times could be attained in the numerical
+simulations. The data labeled “Experiment” is previously unpublished data obtained in the laboratory of Leon
+Moore.
+equations, and M(s, t)depended on the diameter that resulted from the movement of the
+immersed boundary in the ﬂuid. The curve for the simulation was computed as the dis-
+tance between nodes located near x= 50µm, where the steady-state pressure was about
+100 mm Hg. Because the simulation is spatially inhomogeneous, a more complex problem
+was being solved than in the simple model used to estimate the parameters for Eq. (62);
+consequently the simulation diameter is somewhat less than the model over most of the
+time course exhibited in Fig. 4.
+The time scale for the simulation of the dynamic myogenic response was increased by
+a factor of 175 over the time scale of the experimental response. This change of scale was
+introduced because the physiological response requires more time than can be practically
+simulated using the IMBM as formulated here; however, the change of scale can be justiﬁed
+by a consideration of characteristic times (see DISCUSSION). The coefﬁcientsγ, b
+2, and
+b3 determined above incorporate the change of scale.
+To simulate observed experimental diameters of a passive rat afferent arteriole (see Fig. 3),
+the coefﬁcient K p(P(s, t))for a passive model arteriole was determined from the steady-
+state portion of Eq. (60). The forceM was identiﬁed with the pressureP, and KM was taken
+to be K p. An experimental relationship between pressure and diameter, taken from Ref. [6]
+and reproduced in Fig. 3 (Experiment: Passive), was found to be well-approximated by
+K p= 50+ 2(P(s, t)−50)0.8, (64)
+420 ARTHURS ET AL.
+where P(s, t)is in millimeters of mercury. Figure 3 shows the passive response, for the full
+simulation, with this speciﬁcation of K p.
+The percentage of relaxation at a particular vasodilator concentration, which can be
+determined from a dose–response curve, gives the fractional relaxation, r, as a function of
+local solute concentration. For NO, this relationship was approximated by
+r(c(X(s, t),t))= 1
+2[1+ tanh(π[log10(c(X(s, t),t)/0.0004)−1])] (65)
+which gives practically no relaxation at a concentration of 0.0004 µM( r≈0.00186) and
+nearly complete relaxation at a concentration of 0.04 µM( r≈0.998). This relationship
+was based on data from Ref. [21].
+In the numerical implementation of the myogenic force component, Eq. (62) is recast
+as two ﬁrst-order differential equations and solved at each node sk by the forward Euler
+method for(Ka)n
+k . The NO concentration at each nodecn
+k is computed via Eq. (28), and the
+average of cn
+k and cn
+k+1 is used in Eq. (65) to determine the fractional relaxation.
+The myogenic component of the force density at node sk is then calculated as
+(f M)n
+k =
+(
+(KM)n
+k
+Dn
+k
+D0
++γ
+(
+Dn
+k−Dn−1
+k
+)
+D01t
+)
+Xn
+k+1−Xn
+k
+⏐⏐Xn
+k+1−Xn
+k
+⏐⏐ (66)
+for k even. Because nodes sk and sk+1 are opposing,(f M)n
+k+1=−(fM)n
+k for k even.
+5. NUMERICAL SIMULATIONS
+Parameter selection. Parameters must be speciﬁed to characterize the ﬂuid (i.e., the
+blood), the conﬁguration and physical properties of the vessel, and the solute NO. Parameter
+selection criteria are summarized below; parameters are collected in Table III.
+TABLE III
+Model Parameters
+Parameter Symbol Value Reference
+Fluid density ρ 1.055 gm/cm2 [1]
+Apparent dynamic blood viscosity µ 1.75×10−2gm/(cm·s) [23]
+Damping coefﬁcient κ 875,000 gm/(cm2·s)
+Lateral spring coefﬁcient KB 3,104,307 dyne/cm
+Tether spring coefﬁcient KT 10,000 dyne/cm
+External pressure at ﬂuid source ¯P1 100 mm Hg
+External pressure at ﬂuid sink ¯P2 0m mH g
+Resistance at ﬂuid source R1 2.0×107 gm/(s·cm2)
+Resistance at ﬂuid sink R2 2.0×108 gm/(s·cm2)
+Myogenic model viscosity coefﬁcient γ 0.193 mm Hg·s
+Myogenic model coefﬁcient b2 1.60 s
+Myogenic model coefﬁcient b3 0.282 s2
+NO release rate s0 8.32 nmol/(cm3·s) a
+NO diffusivity D 3.3×10−5cm2/s [25]
+NO removal coefﬁcient a1 3.96×10−3s−1 [26]
+NO–hemoglobin binding coefﬁcient a2 0.198 s−1 [22]
+a Based on the study reported in Ref. [36] (Mark Vaughn, personal communication).
+MODELING ARTERIOLAR FLOW 421
+Blood is a complex non-Newtonian ﬂuid composed of plasma, red blood cells, white
+blood cells, and platelets. To obtain a tractable model, however, blood was simulated as a
+Newtonian ﬂuid with an apparent dynamic viscosity. Experimental measurements in an
+arteriole of diameter 23 µm in cat mesentery indicate an apparent viscosity of 1.75 ×
+10
+−2gm/(cm·s) [23]. (The viscosity of water at body temperature is≈0.725×10−2gm/
+(cm·s)).
+The damping coefﬁcientκwas chosen empirically to damp ﬂuid motion exterior to the
+model vessel. The spring coefﬁcients KB and KT were chosen empirically to contain the
+pressures in the physiological range and to anchor the model vessel over the vessel source
+and sink.
+The external pressure at the ﬂuid source, ¯P
+1= 100 mm Hg, and the external resistance
+at the ﬂuid source, R1= 2×107 gm/(s·cm2), were chosen so that the pressure at the ﬂuid
+source would be approximately 95 mm Hg. The external pressure at the ﬂuid sink, ¯P2=
+0 mm Hg, and the external resistance at the ﬂuid sink,R2= 2×108 gm/(s·cm2), were chosen
+so that the pressure at the ﬂuid sink would be approximately 50 mm Hg. These values are
+consistent with pressures found in mid-juxtamedullary afferent arterioles in rat [6]. The
+myogenic model coefﬁcientsγ, b
+2, and b3 were determined as described in Section 4.
+The NO release rate, per unit area, from the wall of rabbit aorta, has been estimated
+[36; Mark Vaughn, personal communication] from experimental data [25] to be 5.2 ×
+10−14µmol/(µm 2·s). In the simulation, NO was released from an approximate delta func-
+tion with side 4 ho centered on the vessel wall. For a ﬂuid domain of any given thickness
+H, the rate of release of NO from the wall segment covered by the delta function ( s0 in
+Eq. (21)), equals the area of the vessel wall of heightH enclosed by the delta function, times
+the release rate per unit area, divided by the volume enclosed by the box of heightH; that is,
+s0= 4ho H×release rate/(unit area)
+(4ho)2 H = 8.32 nmol/(cm3·s). (67)
+NO diffusivity has been measured to be 3.3×10−5cm2/s at 37◦C in rabbit aorta, and
+evidence indicates that NO diffuses freely in aqueous solutions and across biological mem-
+branes [25]. The rate of NO degradation, through reaction with oxygen and water to produce
+nitrites and nitrates, was based on a half-life of 3 s [26]. Based on a calculation that indicated
+that the rate of NO reaction with hemoglobin is more than 100 times more rapid than the rate
+of reaction with O
+2 [22], the rate of NO-hemoglobin binding was assumed to be 50 times
+faster than the reaction of NO with water and dissolved oxygen.
+Discretization in space and time. Simulations were conducted with J= 32, 64, and
+128 points along the y-axis; thus h= 50/32, 50/64, or 50/128 µm. As already speciﬁed in
+Section 3, ho= 50/32, and the two grid reﬁnements will be referred to as ho/2 and ho/4.
+Empirical studies indicate that a time step of 1t=(5/175)×10−5s or smaller is neces-
+sary to maintain numerical stability, and except where stated otherwise, this time step was
+used. Simulations were conducted in double precision on Sun ® Workstations or in single
+precision, using one processor on the Cray® T-90 supercomputer at the North Carolina Su-
+percomputing Center. (Single precision on the Cray® is essentially equivalent to double pre-
+cision on the Sun® Workstation.) A single numerical iteration that includes the full function-
+ality of the simulation required approximately 0.025 CPU s on the Cray® supercomputer.
+Machine error. Although the model prescribes a line of symmetry running through the
+center of the model arteriole ( y= 31.25µm) and although the myogenic forces acting on
+422 ARTHURS ET AL.
+corresponding nodes (sk and sk−1) are equal and opposite, we observed a loss of symmetry
+in boundary node locations. Investigation showed that the loss of symmetry arises from
+reductions in the number of signiﬁcant digits in the subtractions that compute the boundary
+force component (i.e., in the evaluation of Eq. (24)), coupled with asymmetric machine
+roundoff. The loss of symmetry in boundary node locations results in a loss of symmetry
+in the force density applied to the vessel wall by the myogenic components. Eventually a
+region of reduced force density along one side of the model vessel results in an outward
+curvature of the wall; this curvature is accompanied by an inward curvature on the other
+side of the model vessel. When the curvature becomes sufﬁciently large, increased nodal
+separation results in a loss of ﬂuid containment.
+The accumulation of asymmetry was controlled by adjusting the computation of the
+force density pairs(f
+M)n
+k+1,(f M)n
+k : in response to any deviation from symmetry, a weight-
+ing of force components was applied to these force densities in the direction needed to
+restore symmetry. The weighting was constructed to correct both translational and rota-
+tional asymmetries.
+The adjustment in weighting for the myogenic force density pairs was determined in
+the following way. Assume that node s
+k has Eulerian position Xk=(Xk, Yk)and node
+sk+1 has position Xk+1=(Xk+1, Yk+1). The line segment connecting these nodes crosses
+the line of symmetry at the point, say (px, py), wherepy= 31.25µm. Let (fM)n
+k,y be the
+y-component of the myogenic force density at node sk , computed via Eq. (66). Then the
+adjusted component was computed as
+2|Yk−py|
+|Yk+1−Yk|(fM)n
+k,y, (68)
+and the adjustment for (fM)n
+k+1, y was computed analogously. Thus the node more distant
+from the centerline received more force than the other node, resulting in a correction toward
+the line of symmetry.
+Similarly, if(fM)n
+k,x was the computed x-component of the myogenic force density at
+node sk , the adjusted component was computed as
+2|Xk−px|
+|Xk+1−Xk|(fM)n
+k,x, (69)
+and the adjustment for(fM)n
+k+1,x was computed analogously. Since the signs of(fM)n
+k,x and
+(fM)n
+k+1,x differ if there is any rotation relative to the y-axis, the adjusted x-components
+applied a corrective torque. The magnitude of these corrections was small relative to the
+myogenic force density; at quasi-steady-state (see below) the ratio of the myogenic force
+density to the adjustment force was more than 10
+10.
+Overview of simulation results. The following subsections describe an extensive series
+of tests that were performed to evaluate the properties, accuracy, and convergence of the
+numerical methods. For quasi-steady-state (see below), the ﬂow proﬁle in the model vessel
+has the expected parabolic shape for planar Poiseuille ﬂow; the effective width of the
+model vessel wall is about 2h. Shear stress magnitude at the model wall is consistent with
+values expected for planar Poiseuille ﬂow. For a sufﬁciently reﬁned spatial grid (e.g.,h
+o/4),
+the method exhibits robust ﬁrst-order temporal convergence as the time step is reﬁned.
+However, while vessel pressure and diameter proﬁles support convergence in space as the
+spatial grid is reﬁned, the attainment of good convergence throughout the ﬂuid domain
+MODELING ARTERIOLAR FLOW 423
+appears to be limited by the relatively coarse grids that are currently practicable. For good
+spatial resolution in the representation of the ﬂow velocity proﬁle, shear stress, and solute
+advection and diffusion, a grid reﬁnement with h< 1µm is needed.
+5.1. The Pressurized Vessel
+The ﬁrst test of the method was to compute a quasi-steady-state conﬁguration for the wall
+and ﬂuid ﬂow and to compare the velocity in the x-direction with the parabolic velocity
+proﬁle for planar Poiseuille ﬂow. We say quasi-steady-state to indicate that the input and
+output ﬂows are very nearly constant and equal; a pure steady state is not attainable because
+the walls continue to undergo small motions for long times. Beginning from a completely
+quiescent state, approximately 0.06 s are required to reach a quasi-steady-state.
+Fluid ﬂow rates at the source and sink, and the sum of these ﬂow rates as a function of
+time for the three levels of spatial grid reﬁnement are shown in Fig. 5. Flow rates associated
+with the grid reﬁnement spacing h= h
+o undergo oscillations between∼0.02 and∼0.03 s;
+oscillations are of larger magnitude at the sink. These oscillations are associated with vessel
+diameter oscillations in the proximity of the sink. Oscillations are not present in the more
+spatially reﬁned simulations.
+The empirical order of convergence of source and sink ﬂows at 0.07 s, based on values
+found for the three different spatial grid reﬁnements, h
+o, ho/2, and ho/4, was found to be
+∼1.0. The order of convergence, here and in subsequent cases, was computed as follows.
+Let V represent the value of a dependent variable at a speciﬁc grid point, and suppose that
+FIG. 5. Source and sink ﬂuid ﬂow rates and the sum of these rates are shown as a function of time for the
+three levels of spatial grid reﬁnement. Flow for the least reﬁned case exhibits oscillations (notably from∼0.02 to
+∼0.03 s) that are associated with oscillations in the boundary conﬁguration near the sink.
+424 ARTHURS ET AL.
+FIG. 6. Pressure as a function of position on the domain ˜ for the quasi-steady-state is shown for the case
+h= ho/2. Intersections of the wire-frame diagram correspond to every other value on the computational grid. The
+heavy solid line indicates the pressure at the center of the boundary that forms the model arteriolar wall. The sites
+of the source and sink are marked by local pressure deviations at the high and low pressure ends, respectively.
+numerical approximations of V are given by values Vi , corresponding to space-step sizes
+ho/2i . An empirical measure of convergence of three strictly monotonic valuesVi, i= 0, 1, 2,
+may be obtained by solving the three simultaneous equations
+Vi = V∞+ K
+(
+ho/2i)p
+, i= 0, 1, 2 (70)
+for p, V∞, and K (see Appendix). The empirical order of convergence is given byp, V∞is
+the value to which the Vi ’s are (apparently) converging, and K is a measure of truncation
+error.
+Figure 6 shows pressure (in millimeters of mercury) as a function of position on the
+domain˜ for the quasi-steady-state conﬁguration with intermediate spatial grid reﬁnement,
+h= ho/2. The intersections of the wire-frame diagram correspond to every other value on
+the computational grid. The heavy solid line indicates the pressure along the centerline of the
+immersed boundary that forms the model arteriolar wall. There are small but discernable
+pressure variations over the ﬂuid source and sink, but in general, the pressure is nearly
+constant across the width of the vessel and decreases linearly along thex-axis. At the vessel
+wall, however, pressure rapidly decreases to the external pressure, which is essentially zero.
+The computed ﬂuid velocity along the horizontal cross sectionx= 100µm was compared
+to the analogous analytical ﬂuid velocity proﬁles for planar Poiseuille ﬂow between two
+stationary parallel plates separated by width 2 R. The analytical velocity proﬁle has the
+form u
+a(r)=(Px/2µ)(R2−r2), wherer is the location between the plates relative to the
+centerline (thus,−R≤r≤R), Px is the pressure gradient,µ is the dynamic viscosity, and
+ua is the velocity parallel to the plates [7].
+For our comparisons, we approximated Px from the simulation’s pressure gradient by
+using a centered difference across x= 100µm. The analytic velocity proﬁle was evaluated
+for three different separation widths: (1) 2R equals the diameterD of the model vessel, from
+node center to node center; (2) 2R= D−2h; and (3) 2R= D−4h. Separate comparisons
+were made for the three levels of spatial grid reﬁnement.
+MODELING ARTERIOLAR FLOW 425
+FIG. 7. Comparison of model ﬂuidx-velocity u with analytical velocity proﬁlesua for planar Poiseuille ﬂow,
+along the cross section at x= 100µm for the three levels of spatial reﬁnement (h o, ho/2, ho/4, left to right). The
+solid lines indicate model velocity u; the dots indicate grid points. Boxes above the proﬁles show the locations
+of boundary nodes (heavy lines) and the wall thicknesses, based on the support of the approximate delta function
+(width 4h). Analytical proﬁles are shown for three different diameters: (1) D, the diameter of the model arteriole
+based on the node locations (short dashes); (2) D−2h (wide gray line); and (3) D−4h (long dashes). This
+ﬁgure indicates that the effective diameter of the model vessel is D−2h. This ﬁgure also shows that the velocity
+proﬁles exhibit oscillations of decreasing magnitude in the vicinity of the boundary. The oscillations appear to be
+attributable, at least in part, to a Gibbs-type phenomenon that arises because in the analytic limit the derivative of
+the velocity would not be continuous at the boundary.
+Figure 7, panels A, B, and C, show the comparisons for the three levels of spatial grid
+reﬁnement. Boxes above the proﬁles show locations of the boundary nodes as heavy lines
+and they also show the wall thickness, based on a width of 4 h, which is the support of
+the approximate delta function. These results indicate that the model arteriolar wall has an
+effective thickness that depends on the support of the approximate delta function. The best
+ﬁt between the model and analytical data was found when the separation width 2 R equals
+D−2h, which shows that the effective wall thickness is nearly 2 h. Indeed, the computed
+solution appears to converge to the corresponding analytical solution as the grid is reﬁned.
+Figure 7 also shows an oscillation in computedx-velocity near each boundary; the mag-
+nitude of the oscillation decreases with increasing spatial reﬁnement. By comparing the
+simulated velocity with partial sums of the Fourier series approximation to the analytical
+velocity, we concluded that the oscillation is attributable, at least in part, to a Gibbs-type
+phenomenon that arises because the simulations are approximating a velocity proﬁle that
+has a discontinuous derivative at the boundary.
+In Fig. 8, the magnitude of computed shear stress is compared to the analytical shear
+stress for planar Poiseuille ﬂow. Computed shear stress magnitude at x= 100µmi sg i v e n
+as a function of cross-sectional distance for three levels of ﬂuid reﬁnement. Shear stress was
+calculated as µ(∂u/∂y), whereu=(u,v); the derivative was computed with a centered-
+difference approximation. Analytical shear stress is given by aP
+x(y/a−1/2), where a
+is the diameter, y is the cross-sectional distance, and Px is the pressure gradient. For our
+comparison, Px was determined using a centered-difference approximation along the model
+vessel’s centerline. For each level of reﬁnement, the diametera was based on the diameter
+between the nodes of the boundary; however, other diameters based on the diameter between
+nodes minus 2h or 4h do not substantially change the analytical shear stress magnitude as
+a function of distance from the centerline. Vertical shaded bars show the support of the
+approximate delta function that forms the boundary. In all cases, the support is 4 h wide
+426 ARTHURS ET AL.
+FIG. 8. Solid lines indicate the magnitude of shear stress as a function of the cross-sectional location at
+x= 100µm for the three spatial grid reﬁnements (ho, ho/2, ho/4, left to right). Dashed lines show the shear stress
+for planar Poiseuille ﬂow, based on the local pressure gradient. Each set of vertical shaded bars shows the support
+of the approximate delta function that forms a boundary. Each boundary has support thickness 4 h, with heavier
+weight in the lightly shaded central region of thickness 2 h. The ﬁrst three values along the right of each panel,
+from top to bottom, indicate the analytical shear stress magnitudes at the wall center (based on node locations), at
+the interior edge of the wall with thickness 2h, and at the interior edge of the wall with thickness 4h. The bottom
+value is the maximum shear stress magnitude computed by the simulation along the cross section.
+and has heavier weight in the central 2 h region (shaded lighter). Values along the right of
+each panel (from top to bottom) indicate the analytical shear stress magnitude at the wall
+center (based on node location), at the interior edge of the wall with width 2 h, and at the
+interior edge of the wall with width 4 h. The bottom value is the maximum shear stress
+magnitude computed by the simulation. As the spatial resolution is increased, maximum
+simulated shear stress magnitude along the cross section is converging to the analytical
+shear stress magnitude at the wall center with order 1.326. Rates of convergence to the
+other wall locations are similar. In future simulation studies, knowledge of this convergence
+rate will be essential for modeling NO release at the arteriolar wall, because NO release
+rate is a function of shear stress magnitude [4] (see DISCUSSION).
+The larger shear stress magnitude near the wall computed for spatial grid reﬁnement
+h= h
+o/4 tends to stretch the immersed boundary more than in other cases, leading to the
+formation of two small “kinks” (or nearly closed loops) near the sink. These kinks can be
+seen in Figs. 9, 12, 14, and 15. The kinks do not appear to signiﬁcantly inﬂuence ﬂuid ﬂow,
+but they suggest that increasing values of the spring coefﬁcient K
+B may be needed as the
+spatial grid is reﬁned.
+5.2. Temporal Convergence Study
+Temporal convergence studies were conducted for the pressure and velocity over the
+entire computational grid. Using the most reﬁned grid, where h= ho/4, the initial model
+MODELING ARTERIOLAR FLOW 427
+FIG. 9. Gray-scale shading represents temporal convergence for ﬂuid pressureP, x-velocity u, and y-velocity
+v. Convergence is expressed as the order of convergence p at each point on the most reﬁned spatial grid ( ho/4).
+The order calculation was based on three numerical trials (starting at≈2/175 s) with time steps1t/2i , i= 0, 1, 2.
+For P, u, andv, monotonicity is observed at 99.3%, 99.6%, and 93.3% of the spatial grid points, respectively. The
+average order of convergence for monotone regions is 0.896, 0.971, and 1.10 for P, u, andv, respectively. Black
+regions correspond to nonmonotonic values. Solid line indicates the vessel wall. Length scales are in micrometers.
+arteriole conﬁguration was pressurized ( ¯P1= 100 mm Hg, ¯P2= 0 mm Hg) for 2 /175 s
+(with 1t= 5/175×10−5s). Starting from 2/175 s, the simulation was continued with
+a time step of 1t for 10 iterations, with a time step of 1t/2 for 20 iterations, and with a
+time step of1t/4 for 40 iterations. The order of convergence p in time at each point on the
+computational grid was determined for the ﬂuid pressureP, x-velocity u, and y-velocityv,
+using the results of these three continued simulations. Results are shown in Fig. 9. If the three
+values at a particular grid point were not monotonic, the corresponding grid-point region
+was shaded black. The average values of order of convergence, based only on monotone
+regions, were 0.896, 0.971, and 1.10, corresponding to P, u, andv, respectively.
+5.3. Spatial Convergence Studies
+Spatial convergence studies were conducted for ﬂuid pressure and velocity over the entire
+computational grid. Figure 10 shows the order of convergence p in space at each point on
+428 ARTHURS ET AL.
+FIG. 10. Gray-scale shading represents spatial convergence for ﬂuid pressureP, x-velocity u, and y-velocity
+v. Convergence is expressed as the order of convergencep at each point on the coarse computational grid (h= ho)
+for the quasi-steady-state conﬁguration, based on the three levels of spatial grid reﬁnement. For the pressure P
+and the x- and y-velocities (u andv), monotonicity is observed at 96.9%, 70.4%, and 53.1% of the spatial grid
+points corresponding to the grid points of the coarsest grid. In this ﬁgure (unlike Fig. 9), white regions correspond
+to nonmonotonic sites. Convergence at monotonic sites is good or excellent throughout most of the domain; the
+average order of convergence is 0.721, 1.37, and 1.21 forP, u, andv, respectively. Length scales are in micrometers.
+the coarse computational grid (h= ho), based on the three levels of spatial grid reﬁnement
+at an elapsed time of∼0.07 s, which corresponds to quasi-steady-state ﬂow. Average order
+of convergence, for monotone regions, is 0.721, 1.37, and 1.21 forp, u, andv, respectively.
+Although the computed value for the order of convergence for the pressure is substantially
+less than the order of convergence for the velocities, monotonicity is observed at 96.9%
+of the pressure values, while monotonicity is preserved at only 70.4% of the u values and
+53.1% of thev values. Lack of monotonicity is especially prevalent near the boundary, as
+can be seen in Fig. 10. The lack of monotonic convergence near the boundary is expected,
+since the discretized boundary varies with spatial reﬁnement: As the grid is reﬁned, the
+approximate delta functions forming the vessel wall decrease in diameter. So not only is
+the ﬂuid grid being reﬁned, but the width available for ﬂuid ﬂow within the model arteriole
+is substantially increasing—by about 14% as h varies from h
+o to ho/4. Thus, the effective
+ﬂuid domain is changing size as the spatial grid is reﬁned.
+MODELING ARTERIOLAR FLOW 429
+FIG. 11. Average x-velocity, vessel diameter, and pressure along the length of the model arteriole for the
+three levels of spatial grid reﬁnement. For each variable, good convergence along most of the length of the model
+arteriole can be seen; the average order of convergence between 60 and 160µm is 1.187 for the average velocity,
+2.258 for the diameter and 1.117 for the pressure. Oscillations in diameter and velocity are substantially reduced
+by grid reﬁnement. Source and sink locations are distinguishable as local deviations on the pressure proﬁles.
+A comparison of the average velocity, diameter, and ﬂuid pressure along the length of the
+model arteriole for the three spatial grid reﬁnements is given in Fig. 11. Good convergence
+can be seen along most of the model arteriole in each case; the average order of convergence
+between 60µm and 160 µm is 1.187 for the average velocity, 2.258 for the diameter, and
+1.117 for the pressure. Oscillations in the diameter and average velocity are substantially
+reduced by grid reﬁnement.
+Previous convergence studies of the IMBM have used different convergence criteria:
+The order of convergence was evaluated by computing the ratios of the relative differ-
+ences of velocities at successive levels of reﬁnement, with respect to the ℓ
+1,ℓ2, and ℓ∞
+430 ARTHURS ET AL.
+TABLE IV
+Convergence Study of Fluid Velocity and Pressure
+Norm
+Convergence measure ℓ1 ℓ2 ℓ∞
+A=
+∥uho/4−uho/2∥
+∥uho/4∥ 0.07372 0.05697 0.07018
+B=
+∥uho/4−uho∥
+∥uho/4∥ 0.20901 0.15651 0.22732
+Convergence ratio (A/B) 0.35271 0.36400 0.30873
+Order of convergence p for u 0.87593 0.80509 1.16290
+C=
+∥Pho/4−Pho/2∥
+∥Pho/4∥ 0.04754 0.10992 0.68464
+D=
+∥Pho/4−Pho∥
+∥Pho/4∥ 0.12943 0.24217 1.04328
+Convergence ratio (C/D) 0.36730 0.45390 0.65624
+Order of convergence p for P 0.78456 0.26679 −0.93282a
+Note. The convergence ratios reported here were determined using the speciﬁed norm over
+all computational points for the spatial grid reﬁnementh= ho. The order of convergence was
+determined using Eq. (A2), where q is the convergence ratio.
+a The negative value indicates that pressure does not converge in theℓ∞norm.
+norms, evaluated over the entire ﬂuid domain [10, 28]. These studies demonstrated ﬁrst-
+order spatial convergence. We have used these criteria to evaluate our simulation results, for
+quasi-steady-state, using the velocity on the most reﬁned grid (ho/4) as the reference, i.e.,
+(∥uho/4−uh∥p)/∥uho/4∥p, where h= ho, ho/2, and p= 1, 2,∞. Table IV shows that the
+convergence results from our simulations, using these criteria, are consistent with ﬁrst-order
+convergence. Because ﬂuid pressure is used in the determination of model arteriole diame-
+ter, Table IV also includes results for pressure convergence; previous convergence studies
+did not include ﬂuid pressure, since it was considered an intermediate step in calculating
+velocity.
+Thus far, measures of spatial convergence have been applied to ﬂuid variables in the
+domain. Since we are also seeking to simulate the motion of vasoactive substances in the
+arteriolar ﬂow, it is also important to measure the spatial convergence of solute that is
+advected with the local ﬂuid velocity. To test the spatial convergence of solute distribution,
+a solute bolus was introduced into quasi-steady-state ﬂow, and the resulting solute advection
+was observed. Initially, the solute concentration, measured in units of micromolar (µM),
+was a Gaussian centered at the coordinates (39.0625µm, 31.2500 µm) and given by
+c(x, y, 0)= exp
+(
+−(x−39.0625)
+2
+2(2.01875)2
+)
+exp
+(
+−(y−31.2500)2
+2(2.01875)2
+)
+. (71)
+A solute advection comparison for the three levels of spatial grid reﬁnement is shown
+in Fig. 12: ho, panels A1–A4; ho/2, panels B1–B4; ho/4, panels C1–C4. The ﬁrst column
+corresponds to an elapsed time of 3/3500 s after the bolus was introduced; each successive
+column is time-advanced by 3 /3500 s. Truncation error signiﬁcantly affects solute con-
+servation; indeed, after an elapsed time of 9 /3500 s, 93.3% of the initial solute remains
+for h
+o, 98.6% remains for ho/2, and 99.2% remains for ho/4. Concentration proﬁles along
+the line y= 31.25µm are shown in Fig. 13 for each of the times shown in Fig. 12. The
+MODELING ARTERIOLAR FLOW 431
+FIG. 12. Advection of solute bolus in quasi-steady-state ﬂow for the three levels of spatial grid reﬁnement:
+ho, panels A1–A4; ho/2, panels B1–B4; ho/4, panels C1–C4. The ﬁrst column corresponds to dimensional time
+t= 3/3500 s; each successive column is time-advanced by 3/3500 s. The bar at the right indicates the concentration
+scale in micromolar. Initially the bolus has a Gaussian distribution. The ﬁgure shows that the eighth-order method
+employed controls artifactual diffusion, but that substantial grid reﬁnement is needed for accurate representation
+of solute distribution in time. For the simulations shown in column 4, solute has begun to leave the domain through
+the ﬂuid sink. The solid line indicates the vessel wall. Length scales are in micrometers.
+432 ARTHURS ET AL.
+FIG. 13. Concentration proﬁles along the vertical line of symmetry through the model arteriole (i.e., along
+y= 31.25µm) for the cases shown in Fig. 12. The elapsed time is labeled on each panel, corresponding to columns
+1–4 in Fig. 12. The dotted line in panel 1 shows the initial solute proﬁle translated by the distance that the maximum
+solute concentration advected for the most reﬁned spatial grid. Solute has begun leaving the domain in panel 4,
+which explains the clipped shape of the leading edge of the curves. The decrease in maximum concentration with
+decreasing grid reﬁnement can be seen; the maximum concentration for each proﬁle is given in Table V . The ﬁgure
+also shows that the velocity along y= 31.25µm varies with each spatial grid reﬁnement.
+maximum concentration of the bolus along the line y= 31.25µm for each level of spatial
+grid reﬁnement is reported in Table V . From this comparison, we conclude that a minimum
+grid reﬁnement ofho/2 is required to acceptably simulate solute advection within the model
+arteriole.
+In the ﬁnal simulation, NO was released from opposing locations along the model arteri-
+ole wall. The NO advects with the local ﬂuid velocity, diffuses, degrades, and, as a function
+of local concentration, dilates the vessel diameter. Based on Eq. (67) NO was released from
+TABLE V
+Maximum Concentration (µ M) from Figs. 12 and 13
+Elapsed time (s) ho ho/2 ho/4
+0 1.000000 1.000000 1.000000
+3/3500 0.740285 0.920517 0.975542
+6/3500 0.693732 0.906282 0.973109
+9/3500 0.678352 0.904106 0.972825
+Note. Concentrations are not provided for the elapsed time 12/3500 s because
+at that time a signiﬁcant amount of solute has exited the domain at the ﬂuid sink.
+MODELING ARTERIOLAR FLOW 433
+TABLE VI
+Distance (µ m) along Model Arteriolar Wall from NO Source That Corresponds to Speciﬁed
+NO Concentrations for Each Level of Spatial Grid Reﬁnement Shown in Fig. 14
+1µM 0.1µM 0.01µM
+Elapsed time (s) ho ho/2 ho/4 ho ho/2 ho/4 ho ho/2 ho/4
+1/700 3.87 4.53 4.83 11.56 12.49 13.43 17.66 20.10 21.90
+2/700 6.02 6.82 7.01 18.35 21.42 23.85 34.16 41.87 45.52
+3/700 6.92 8.23 8.36 24.70 30.71 34.26 54.38 68.93 74.57
+4/700 7.72 9.15 9.24 28.85 37.37 43.40 79.10 96.52 104.40
+the wall at the rate of 8.32 nmol/(cm 3·s) from an approximate delta function of side 4 ho
+centered at the boundary nodes whose unstressed locations are given (in micrometers) by
+the coordinates (56.2500, 26.5625) and (56.2500, 35.9375). Results from the simulation for
+the three levels of spatial grid reﬁnement are shown in Fig. 14. The ﬁrst column corresponds
+to an elapsed time of 1/700 s after NO was introduced into the quasi-steady-state conﬁgu-
+ration; successive columns are time-advanced by 1/700 s. Table VI provides the distance
+in micrometers, measured along the model arteriole wall relative to the NO source, where
+concentration levels of 0.1, 0.01, and 0.001µM are found. There are signiﬁcant differences
+between the distances NO is advected for the levels of spatial grid reﬁnement, especially
+for the ﬁrst reﬁnement toh
+o/2, owing in part to the thinner boundary and the more accurate
+ﬂuid velocities computed near the boundary.
+In this simulation, the periodic domain used for solute diffusion and degradation only
+was twice as large in they-coordinate as the ﬂuid domain. This increase in domain size was
+needed to track the signiﬁcant distances solute can advance owing to diffusion. Since ﬂuid
+motion outside of the model arteriole was essentially zero, the larger domain had no effect
+on solute advection. In panel A of Fig. 15, at an elapsed time of 6/700 s, the effects of solute
+wrap-around owing to diffusion can be seen. After 12/700 s, solute has almost completely
+ﬁlled the domain as shown in panel B. In future simulations, a larger solute domain will be
+required, or perhaps a different methodology, such as absorbing boundary conditions, may
+be used [17].
+Figure 16 shows the NO concentration along the model wall and the diameter and ﬂuid
+pressure along the length of the model arteriole at a grid reﬁnement of h= h
+o/4 for the
+quasi-steady-state conﬁguration (dashed line) and for the simulation arterioles shown in
+Figs. 14 and 15. Signiﬁcant vessel dilation is seen with increasing time, with the ﬁnal time
+of 12/700 s (gray line) corresponding to an almost completely relaxed arteriole. Thus,
+although NO is being removed at a rapid rate, these simulations show that there is sufﬁcient
+velocity near the walls to advect NO the entire length of the model arteriole.
+6. DISCUSSION
+We have developed a model of arteriolar ﬂuid ﬂow that includes a phenomenological
+model of the myogenic response of the arteriolar wall and that can include the release,
+distribution, and action of vasoactive substances. We have used the model to simulate
+hemodynamic regulation in the renal afferent arteriole, where the myogenic response and
+the vasodilatory action of NO are components of a complex system that regulates the rate
+434 ARTHURS ET AL.
+FIG. 14. Release, advection, diffusion, and degradation of NO for the three levels of spatial grid reﬁnement:
+ho, panels A1–A4; ho/2, panels B1–B4; ho/4, panels C1–C4. The ﬁrst column corresponds to dimensional time
+t= 1/700 s after NO was introduced into established quasi-steady-state ﬂow; each successive column is time-
+advanced by 1/700 s. The bar at the right indicates the NO concentration scale in micromolar. NO is released
+from two sites ﬁxed on the model arteriolar wall. Table VI provides the distance along the arteriolar wall from
+the NO source that corresponds to NO concentrations of 1.0, 0.1, and 0.01 µM for each simulation shown. The
+solid line indicates the vessel wall. Length scales are in micrometers. To better represent NO diffusion, the spatial
+grid used for diffusion was constructed to be twice as wide as that used for the ﬂuid domain (see a more detailed
+explanation in the text).
+MODELING ARTERIOLAR FLOW 435
+FIG. 15. NO concentration on the grid reﬁnement h= ho/4 after longer elapsed times than those shown in
+Fig. 14. Panel A shows an elapsed time of 6/700 s; the solute that has diffused to the bottom of the domain begins
+to wrap around the periodic domain and to overlap at the top, owing to the periodic boundary. Panel B illustrates
+an elapsed time of 12/700 s; the solute diffused at the sides begins to wrap around the domain. The solid line
+indicates the vessel wall. Length scales are in micrometers.
+of ﬂuid entry into the nephrons of the kidney. This regulation helps maintain the balance
+between the reabsorptive capacity of the nephron and the ﬂuid load. Moreover, the regulatory
+action of the afferent arteriole protects the delicate glomerular capillaries from injury.
+Numerical solutions to the model ﬂuid equations were obtained by means of the IMBM.
+Advection of NO was computed by means of a high-order ﬂux-corrected transport scheme,
+and diffusion of NO was computed by a spectral solver. We investigated the temporal
+and spatial convergence properties of model variables, especially near the boundary; these
+convergence studies were made possible, in part, by the simple model geometry, which
+produces an approximation to planar Poiseuille ﬂow. As shown in Section 5.3, a spatial grid
+reﬁnement with h< 1µm is required to track ﬂuid and solute with sufﬁcient accuracy for
+physiologically meaningful simulations. This grid reﬁnement corresponds to approximately
+1/25th the diameter of the model arteriole. The methods developed and tested in this study
+could be applied to other physiological tubular structures that have low Reynolds number
+ﬂow, e.g., to other small vessels, to vessel networks, or to the tubules of the nephron.
+The numerical methods utilized in this study are formulated with ﬁrst-order differenc-
+ing in time, and the convergence study of Section 5.2 indicates that ﬁrst-order temporal
+436 ARTHURS ET AL.
+FIG. 16. The concentration along the model wall and the diameter and pressure along the length of the model
+arteriole are shown at a spatial grid reﬁnement h= ho/4 for the quasi-steady-state conﬁguration and for the
+conﬁgurations shown in Figs. 14 and 15. Data for the model arteriole at elapsed times of 1 /700, 2/700, 3/700,
+4/700, 6/700, and 12/700 s, are labeled 1, 2, 3, 4, 5, and LT (gray line), respectively. Quasi-steady-state conﬁgu-
+ration is labeled SS (dashed line). (No curve labeled SS appears in the topmost panel, since the NO concentration
+is zero for the quasi-steady-state conﬁguration.) Wall relaxation, owing to signiﬁcant NO concentration, extends
+along the length of the model arteriole. After 12/700 s (LT), the arteriole has reached maximal relaxation for this
+level of NO.
+convergence is attained over most of the ﬂuid domain. Because very small time steps are
+required to maintain stability in the IMBM, ﬁrst-order time differencing should provide a
+high degree of temporal accuracy.
+Although our empirical evaluation indicates second-order spatial convergence in key
+quantities (see Sections 5.1 and 5.3), the spatial convergence properties of the numerical
+MODELING ARTERIOLAR FLOW 437
+methods differ. The tripartite splitting in the ﬂuid solver uses ﬁrst-order upwind differencing
+for the inertial (hyperbolic) term, a spectral method—which is high-order—for the viscous
+(parabolic) term, and a method of unknown spatial convergence for the force arising from
+the boundary nodes. The hyperbolic term, because its relative contribution to the solution is
+small, probably has little inﬂuence on the spatial convergence of the ﬂuid solver. Indeed, in
+the calculation of the x-velocity u at the location (100µm, 31.25 µm), the center of fully
+developed simulated arteriolar ﬂow, the ratio of the viscous term magnitude to the inertial
+term magnitude is∼10
+5.
+An important scientiﬁc conclusion of this study is that NO transported in the intravascular
+ﬂow can stimulate signiﬁcant downstream vasodilation, because NO advection, relative to
+diffusion and degradation, is the dominating effect. This conclusion is consistent with the
+results of Lancaster whose one-dimensional model included NO diffusion, degradation, and
+binding with luminal hemoglobin [22]. Also, since experimental observations show that the
+myogenic response maintains a nearly constant vessel diameter as length along the vessel
+increases (and thus intravascular pressure decreases), this study suggests that there is an
+intrinsic mechanism that modulates the myogenic response so that it acts more strongly in
+the proximal arteriole, where the pressure is higher, than in the distal arteriole, where the
+pressure is lower.
+Several computational issues merit more attention. As noted in Section 4, the time scale
+of the dynamic myogenic response was increased by more than two orders of magnitude
+so that the myogenic response could be simulated with currently available supercomputing
+resources. Depending on the phenomenon under investigation, this may not be a serious
+shortfall of the simulation. For example, in the current application, the distribution of NO
+is advection dominated, and the ﬂuid transit time of the afferent arteriole is much faster
+than the characteristic time of the myogenic response. Indeed, the physiological myogenic
+response requires∼10 s, the accelerated myogenic response requires∼0.06 s, and the ﬂuid
+transit time is∼0.006 s. To perform simulations on a true time scale, longer time steps
+would need to be taken, perhaps by using a more stable numerical method for incorporating
+the boundary force density.
+In long-time simulations, the accumulation of machine error causes a loss of symmetry
+in the conﬁguration of the model vessel wall, which may eventually lead to a loss of ﬂuid
+containment. In Section 5 we described a numerical adjustment that acts to reduce the
+accumulation of machine roundoff error by adjusting the forces arising from the model
+of the myogenic response. However, a better method for controlling this error is needed
+for reliable long-time solutions. For more quantitatively accurate simulations, the model
+should be formulated in three-dimensional space, perhaps by using a ﬂuid solver formulated
+in cylindrical coordinates, which would enforce radial symmetry.
+Several physiological issues also merit attention. The diameter of red blood cells is about
+0.4 of the diameter of the arteriole; blood cells are known to be concentrated near the
+center of the arteriolar ﬂow and to therefore exert a spatially inhomogeneous effect on
+the ﬂow characteristics [34]. Also, the NO carried by the plasma undergoes complicated
+chemical interactions with the hemoglobin in the red blood cells, including binding of NO
+to hemoglobin, saturation of binding sites, and downstream release of NO, where plasma O
+2
+concentration is reduced [35]. We have not modeled red blood cells (although this is possible
+by means of the IMBM), and we have not modeled the chemical interactions in this study.
+Moreover, several other important vasoactive substances (e.g., endothelin, a vasoconstrictor
+released by endothelial cells [26]) have been identiﬁed which could be included in a more
+438 ARTHURS ET AL.
+realistic model. An additional factor that inﬂuences afferent arteriolar muscle tension is the
+tubuloglomerular feedback (TGF) mechanism. Many aspects of TGF are well understood
+[33], and its effects could be integrated into the model.
+Because our model for the myogenic response was based on experiments in which shear-
+stress-induced release of NO from endothelial cells was active, the model implicitly includes
+the response of the arteriolar wall to baseline levels of NO. In subsequent simulations,
+however, the myogenic response and arteriolar wall response to shear-stress-induced NO
+might be proﬁtably decoupled. Such a decoupling could be important in the simulation of
+a focal constriction arising from injury [18].
+In this study, we have not modeled the physical structure of the arteriolar wall, nor the
+mechanism of myogenic response; the IMBM is formulated as a boundary with singular
+support and our model for the myogenic response is phenomenological, i.e., it depends on
+the response to tubular pressure but does not incorporate the biochemical mediation and
+cellular generation of the contractile response. However, we have modeled the effect of
+the wall and the action of the myogenic mechanism in regulating arteriolar ﬂow. The ﬂuid
+interaction with the wall is of critical importance in determining the ﬂow characteristics, and
+therefore, in this study, we conducted extensive tests to ascertain the degree of numerical
+reﬁnement required for an accurate representation of that interaction. Because we intend
+to apply this model to realistic physiological contexts, this investigation, which serves to
+validate our methodology, is an essential ﬁrst step.
+APPENDIX
+Here we provide explicit formulas for computing p, V∞, and K from Eq. (70). Let
+q= V2−V1
+V2−V0
+. (A1)
+Then, after straightforward calculations, one ﬁnds
+p= ln(1/q−1)
+ln(2), (A2)
+K= V0−V1
+(ho)p(1−2−p), (A3)
+and
+V∞= V0−K(ho)p. (A4)
+ACKNOWLEDGMENTS
+This study is largely based on material that appeared in the ﬁrst author’s doctoral dissertation,Flow Regulation in
+the Afferent Arteriole: An Application of the Immersed Boundary Method(University Microﬁlms, Ann Arbor, MI,
+1996). This research was supported in part by the National Institute of Diabetes and Digestive and Kidney Diseases
+through Grant DK42091 to H. E. Layton and the National Science Foundation through Group Infrastructure Grant
+DMS-9709608 to M. C. Reed, H. E. Layton, and J. J. Blum. Supercomputer time was provided by the North
+Carolina Supercomputing Center in the form of several allocations to H. E. Layton. We thank John M. Davies for
+assistance in ﬁgure preparation.
+MODELING ARTERIOLAR FLOW 439
+REFERENCES
+1. P. L. Altman and D. S. Dittmer, Respiration and Circulation (Federation of American Societies for Experi-
+mental Biology, Bethesda, MD, 1971).
+2. R. P. Beyer Jr., A computational model of the cochlea using the immersed boundary method,J. Comput. Phys.
+98, 145 (1992).
+3. W. L. Briggs and V . E. Henson,The DFT: An Owner’s Manual for the Discrete Fourier Transform(Soc. Indus.
+Appl. Math., Philadelphia, 1995).
+4. R. Busse, I. Fleming, and V . B. Schini, Nitric oxide formation in the vascular wall: Regulation and functional
+implications, Curr. Top. Microbiol. Immunol.196, 7 (1995).
+5. D. Casellas and L. C. Moore, Autoregulation of intravascular pressure in preglomerular juxtamedullary vessels,
+Am. J. Physiol. 264 [Renal Fluid Electrolyte Physiol. 33], F315 (1993).
+6. D. Casellas and L. C. Moore, Autoregulation and tubuloglomerular feedback in juxtamedullary glomerular
+arterioles, Am. J. Physiol. 258 [Renal Fluid Electrolyte Physiol. 27], F660 (1990).
+7. A. J. Chorin and J. E. Marsden,A Mathematical Introduction to Fluid Mechanics(Springer-Verlag, New York,
+1993).
+8. G. J. Christ, P. R. Brink, and S. V . Ramanan, Dynamic gap junctional communication: A delimiting model
+for tissue response, Biophys. J. 67, 1335 (1994).
+9. R. Dillon, L. Fauci, and D. Gaver III, A microscale model of bacterial swimming, chemotaxis, and substrate
+transport, J. Theor. Biol.177, 325 (1995).
+10. R. Dillon, L. Fauci, A. Fogelson, and D. Gaver III, Modeling bioﬁlm processes using the immersed boundary
+method, J. Comput. Phys. 129, 57 (1996).
+11. L. J. Fauci, Peristaltic pumping of solid particles, Comp. Fluids 21, 583 (1992).
+12. L. J. Fauci and A. McDonald, Sperm motility in the presence of boundaries, Bull. Math. Biol. 57, 679
+(1995).
+13. L. J. Fauci and C. S. Peskin, A computational model of aquatic animal locomotion, J. Comput. Phys. 77,8 5
+(1988).
+14. A. L. Fogelson, A mathematical model and numerical method for studying platelet adhesion and aggregation
+during blood clotting, J. Comput. Phys. 56, 111 (1984).
+15. A. L. Fogelson and C. S. Peskin, A fast numerical method for solving the three-dimensional Stokes’ equations
+in the presence of suspended particles, J. Comput. Phys. 79, 50 (1988).
+16. Y . C. Fung, Biomechanics: Mechanical Properties of Living Tissues , 2nd ed. (Springer-Verlag, New York,
+1993).
+17. L. Halpern and J. Rauch, Absorbing boundary conditions for diffusion equations, Numer. Math. 71, 185
+(1995).
+18. G. Hansson, Y . Geng, J. Holm, P. H˚ ardhammar, ˚A. Wennmalm, and E. Jennische, Arterial smooth muscle
+cells express nitric oxide synthase in response to endothelial injury, J. Exp. Med. 180, 733 (1994).
+19. L. Jia, C. Bonaventura, J. Bonaventura, and J. S. Stamler, S-nitrosohaemoglobin: A dynamic activity of blood
+involved in vascular control, Nature 380, 221 (1996).
+20. C. T. Kelly, Iterative Methods for Linear and Nonlinear Equations, Frontiers in Applied Math., V ol. 16
+(Soc. Indus. Appl. Math., Philadelphia, 1995).
+21. M. Kelm, M. Feelisch, R. Spahr, H. Piper, E. Noack, and J. Schrader, Quantitative and kinetic characterization
+of nitric oxide and ERDF released from cultured endothelial cells, Biochem. Biophys. Res. Commun. 154(1),
+236 (1988).
+22. J. R. Lancaster Jr., Simulation of the diffusion and reaction of endogenously produced nitric oxide,Proc. Nat.
+Acad. Sci. USA 91, 8137 (1994).
+23. H. H. Lipowsky and B. W. Zweifach, Methods for the simultaneous measurement of pressure differentials
+and ﬂow in single unbranched vessels of the microcirculation for rheological studies,Microvasc. Res.14, 345
+(1977).
+24. T. F. Luescher, Imbalance of endothelium-dervied relaxing and contracting factors: A new concept in hyper-
+tension, Am. J. Hypertension 3, 317 (1990).
+440 ARTHURS ET AL.
+25. T. Malinski, Z. Taha, S. Grunfeld, S. Patton, M. Kapturczak, and P. Tomboulian, Diffusion of nitric oxide in
+the aorta wall monitored in situ by porphyrinic microsensors, Biochem. Biophys. Res. Commun. 193, 1076
+(1993).
+26. B. O. Oluwole, M. McMillen, and B. E. Sumpio, Endothelial cell control of vasomotor tone,Ann. Vasc. Surg.
+9, 293 (1995).
+27. C. S. Peskin, Numerical analysis of blood ﬂow in the heart, J. Comput. Phys. 25, 220 (1977).
+28. C. S. Peskin and D. M. McQueen, A three-dimensional computational method for blood ﬂow in the heart.
+I. Immersed elastic ﬁbers in a viscous incompressible ﬂuid, J. Comput. Phys. 81, 372 (1989).
+29. C. S. Peskin and D. M. McQueen, A general method for the computer simulation of biological systems
+interacting with ﬂuids, in Biological Fluid Dynamics, edited by C. P. Ellington and T. J. Pedley, Symposia
+of the Society for Experimental Biology, No. 49 (Soc. Exp. Biol. Company of Biologists Ltd., Cambridge,
+1995), p. 265.
+30. W. H. Press, S. A. Teukolsky, W. T. Vetterling, and B. P. Flannery,Numerical Recipes in Fortran: The Art of
+Scientiﬁc Computing, 2d ed. (Cambridge Univ. Press, New York, 1992).
+31. N. Rashevsky, Mathematical Biophysics: Physico-Mathematical Foundations of Biology, V ol. 1 (Dover, New
+York, 1960).
+32. B. D. Rose and H. G. Rennke,Renal Pathophysiology—The essentials(Williams & Wilkins, Baltimore, 1994).
+33. J. Schnermann and J. Briggs, Function of the juxtaglomerular apparatus: Control of glomerular hemodynamics
+and renin secretion, in The Kidney: Physiology and Pathophysiology (2d ed.), edited by D. W. Seldin and
+G. Giebisch (Raven, New York, 1992), p. 1249.
+34. T. W. Secomb, Mechanics of blood ﬂow in the microcirculation, in Biological Fluid Dynamics , edited by
+C. P. Ellington and T. J. Pedley, Symposia of the Society for Experimental Biology, No. 49 (Soc. Exp. Biol.
+Company of Biologists Ltd., Cambridge, 1995), p. 305.
+35. J. S. Stamler, L. Jia, J. P. Eu, T. J. McMahon, I. T. Demchenko, J. Bonaventura, K. Gernert, and C. A.
+Piantadosi, Blood ﬂow regulation by S-nitrosohemoglobin in the physiological oxygen gradient,Science 276,
+2034 (1997).
+36. M. W. Vaughn, L. Kuo, and J. C. Liao, Modeling of endothelial nitric oxide production and diffusion,FASEB
+J. 11(3), A288, Abstract No. 1673 (1997).
+37. S. T. Zalesak, Fully multidimensional ﬂux-corrected transport algorithms for ﬂuids J. Comput. Phys. 31, 335
+(1979).
+38. S. T. Zalesak, A preliminary comparison of modern shock-capturing schemes: Linear advection, inAdvances
+in Computer Methods for Partial Differential Equations VI: Proceedings of the 1987 IMACS Conference ,
+edited by R. Vichnevetsky and R. S. Stepleman (Internat. Assoc. Math. Comput. Simulation, New Brunswick,
+NJ, 1987), p. 15.

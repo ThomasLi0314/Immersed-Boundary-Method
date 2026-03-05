@@ -1,0 +1,57 @@
+\documentclass{article}
+
+\usepackage{D://Documents/Latex/Latex_Template/NotesTeXV3_test}
+\usepackage{subfiles}
+\usepackage{wrapfig} % Required for wrapping text around figures
+\usepackage{lipsum}  % Just for generating dummy text in this example
+
+\input{D://Documents/Latex/Latex_Template/Custom_Commands.tex}
+
+\special{dvipdfmx:config z 0}
+
+\begin{document}
+
+\title{{Notes on Immersed Boundary Method}\\{\normalsize{\itshape Junior Year}}}
+	\author{Thomas Li}
+	\affiliation{
+	Undergrauate Student at New York University Shanghai\\
+	}
+	\emailAdd{jl15535@nyu.edu}
+	\maketitle
+    \pagestyle{fancynotes}
+	\newpage
+
+\subfile{IMB_Introduction/Section_1.tex}
+
+\newpage
+\subfile{Penalty_Immersed_Boundary/section2.tex}
+
+I will explain the principles for choosing the timestep dt without entering task planning mode as it's a conceptual question.
+
+When choosing the timestep dt for an Immersed Boundary Method (IBM) simulation (especially one solving the Navier-Stokes equations with explicit or semi-implicit time integration), you generally need to satisfy several stability constraints. The chosen dt must be the minimum of the time steps required by each of these independent conditions.
+
+Here are the primary principles and criteria you should refer to:
+
+1. The Courant-Friedrichs-Lewy (CFL) Condition (Advective Stability)
+This is the most fundamental restriction for any explicit fluid solver. It ensures that fluid information doesn't move more than one grid cell per timestep. For a 2D simulation, the CFL condition is: $$ \Delta t_{\text{CFL}} \le C_{\text{max}} \left( \frac{\Delta x}{|u|{\text{max}}} + \frac{\Delta y}{|v|{\text{max}}} \right)^{-1} \quad \text{or simply} \quad \Delta t_{\text{CFL}} \le C_{\text{max}} \frac{\min(\Delta x, \Delta y)}{V_{\text{max}}} $$ Where:
+
+$V_{\text{max}}$ is the maximum expected velocity magnitude in the domain.
+$C_{\text{max}}$ is the Courant number, which typically must be $\le 1.0$ for stability, but often a safer value like $0.2 \sim 0.5$ is chosen in IBM to account for explicit body forces.
+2. Viscous Diffusion Stability Constraint
+If your Viscous term (the diffusion term $\mu \nabla^2 \mathbf{u}$) is solved explicitly, you have a strict parabolic stability limit: $$ \Delta t_{\text{visc}} \le \frac{1}{2 \nu} \left( \frac{1}{\Delta x^2} + \frac{1}{\Delta y^2} \right)^{-1} $$ Where $\nu = \mu / \rho$ is the kinematic viscosity. (Note: If your Navier-Stokes solver uses an implicit method like Crank-Nicolson for the viscous terms, this specific restriction is bypassed, and only the CFL condition applies for the fluid).
+
+3. Immersed Boundary Elastic Stability (The biggest restrictor)
+In the Immersed Boundary Method, the fluid and the boundary are coupled explicitly. The boundary exerts elastic restoring forces (spring forces $K_{\text{mem}}$ and tether/penalty forces $K_{\text{tar}}$) on the fluid.
+
+This explicit coupling introduces severe numerical stiffness. If $\Delta t$ is too large, an elastic restoring force will over-correct the position of a boundary point, causing it to overshoot its equilibrium position in the next step, leading to explosive oscillations (unstable blow-up).
+
+The stability limits for these explicit Hookean springs roughly scale as: $$ \Delta t_{\text{spring}} \sim \mathcal{O}\left( \frac{\Delta x}{\sqrt{K_{\text{mem}} / \rho}} \right) $$ and for the penalty force: $$ \Delta t_{\text{penalty}} \sim \mathcal{O}\left( \sqrt{\frac{m}{K_{\text{tar}}}} \right) \quad \text{or numerically} \quad \Delta t_{\text{penalty}} \propto \frac{\Delta x^2}{K_{\text{tar}}} $$
+
+Practical Takeaway for IBM: Because of the explicit coupling of the stiff membrane forces, the timestep is almost always heavily dominated by your boundary stiffness. When you increased $K_{\text{tar}}$ to $1000$ and $K_{\text{mem}}$ to $10$ in your latest changes, you successfully compensated by drastically dropping your dt from 0.005 to 0.0001! This is exactly the right intuition.
+
+Recommended Workflow for tuning dt:
+Start Conservative: Find a dt that works without blowing up (like your 0.0001).
+Monitor maximum velocity: Keep track of your maximum $\mathbf{u}$ in the domain to ensure your CFL $\approx \frac{V_{\text{max}} \Delta t}{\Delta x}$ stays well below $0.5$.
+If the simulation blows up immediately (often outputting NaN everywhere): Your $K_{\text{tar}}$ or $K_{\text{mem}}$ is too stiff for your dt. You must either lower the stiffness or decrease dt.
+If the simulation blows up later in the run: This is usually a CFL violation where the fluid velocity locally accelerated too much, pushing the Courant number above $1.0$. Decrease dt.
+\end{document}
