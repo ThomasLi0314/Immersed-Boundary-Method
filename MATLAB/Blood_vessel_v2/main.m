@@ -218,3 +218,6 @@ save(full_path_sim, 'u_history', 'p_history', 'X_history_top','X_history_bot', '
     'K_M', 'gamma_M', 'D0', 'fix_ind');
 
 fprintf('Data saved to: %s\n', full_path_sim);
+
+
+% thest
