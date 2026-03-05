@@ -7,11 +7,10 @@ close all;
 % Change this part
 % Time spacing
 Tmax = 20; % total time (s)
-dt = 0.001; % Time spacing (s)
+dt = 0.0001; % Time spacing (s)
 n_steps = floor(Tmax / dt); % Number of steps
 K_tar = 1e6; % Tether stiffness at anchor nodes (very large to pin endpoints)
-% K_mem = 1e5;   % Stiffness constant between mass points (0 = flat rigid wall, no membrane elasticity)
-K_mem = 0;
+K_mem = 1e3;   % Stiffness constant between mass points (0 = flat rigid wall, no membrane elasticity)
 use_parallel = true; % Set true to start a parallel pool (speeds up internal MATLAB ops via implicit parallelism)
 
 ratio = K_tar / max(K_mem, eps); % the stiffness ratio (guard against K_mem = 0)
@@ -54,9 +53,9 @@ mu  = 320;    % dynamic viscosity (code units; ν = µ/ρ = 320 µm²/s)
 G = 10;       % body force (code units)
 
 % Grid size — brain arteriole: ~200 µm long, domain 100 µm wide
-Lx = 2000;   % vessel length (µm)
+Lx = 200;   % vessel length (µm)
 Ly = 100;   % domain width  (µm)
-Nx = 1280;   % grid points in x
+Nx = 512;   % grid points in x
 Ny = Nx * Ly / Lx;  % = 64
 
 % Grid spacing 
@@ -94,12 +93,22 @@ X_bot(:, 1) = X_top(:, 1);
 X_top(:, 2) = Ly / 2 + y_displace;
 X_bot(:, 2) = Ly / 2 - y_displace;
 
+%% Fixed index
+
+% Test1 first and last two
 % We fix the start and end of the tube points. 
 % fix_ind = [1, 2, Num_b-1, Num_b];   % Tether anchors at first/last 2 nodes only
 % fix_ind = [1, 2];
 
-%% fix index for possieul flow
-fix_ind = (1 : Num_b);
+% Test2 all
+% fix index for possieul flow
+% fix_ind = (1 : Num_b);
+
+% Test3 middle
+% fix_ind = [Num_b / 2, Num_b / 2 + 1];
+
+% Test 4 Fix 10 evenly spaced indices along the full length
+fix_ind = round(linspace(1, Num_b, 10));
 
 %% Myogenic reference diameter & state (depends on y_displace, defined above)
 D0     = 2 * y_displace;             % Reference diameter (initial wall separation)
@@ -120,6 +129,14 @@ for j = 1:Ny
     y = (j-1)*dy;
     if (y > X_bot(1,2)) && (y < X_top(1,2))
         f_drive(:, j, 1) = G;   % uniform across all x-columns, but only inside the tube
+    end
+end
+
+% Test, add drive force at the middle
+for j = 1:Ny
+    y = (j-1)*dy;
+    if (y > X_bot(1,2)) && (y < X_top(1,2))
+        f_drive(Num_b / 2, j, 1) = G;   % only at the middle
     end
 end
 

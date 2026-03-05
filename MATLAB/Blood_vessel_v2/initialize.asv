@@ -7,10 +7,10 @@ close all;
 % Change this part
 % Time spacing
 Tmax = 20; % total time (s)
-dt = 0.0001; % Time spacing (s)
+dt = 0.001; % Time spacing (s)
 n_steps = floor(Tmax / dt); % Number of steps
 K_tar = 1e6; % Tether stiffness at anchor nodes (very large to pin endpoints)
-K_mem = 1e5;   % Stiffness constant between mass points (0 = flat rigid wall, no membrane elasticity)
+K_mem = 1e3;   % Stiffness constant between mass points (0 = flat rigid wall, no membrane elasticity)
 use_parallel = true; % Set true to start a parallel pool (speeds up internal MATLAB ops via implicit parallelism)
 
 ratio = K_tar / max(K_mem, eps); % the stiffness ratio (guard against K_mem = 0)
@@ -19,6 +19,10 @@ ratio = K_tar / max(K_mem, eps); % the stiffness ratio (guard against K_mem = 0)
 K_M     = 100;     % Myogenic spring stiffness (constant for initial impl.)
 gamma_M = 1;    % Viscous damping coefficient for diameter rate-of-change
 K_hor   = 10;   % Weak horizontal restoring stiffness (prevents downstream drift)
+
+% K_M = 0;
+% gamma_M = 0
+% K_hor = 0;
 % D0 and D_prev are set after y_displace is defined (see below)
 
 %% Add a perturbation force
@@ -89,12 +93,22 @@ X_bot(:, 1) = X_top(:, 1);
 X_top(:, 2) = Ly / 2 + y_displace;
 X_bot(:, 2) = Ly / 2 - y_displace;
 
+%% Fixed index
+
+% Test1 first and last two
 % We fix the start and end of the tube points. 
 % fix_ind = [1, 2, Num_b-1, Num_b];   % Tether anchors at first/last 2 nodes only
-fix_ind = [1, 2];
+% fix_ind = [1, 2];
 
-%% fix index for possieul flow
+% Test2 all
+% fix index for possieul flow
 % fix_ind = (1 : Num_b);
+
+% Test3 middle
+% fix_ind = [Num_b / 2, Num_b / 2 + 1];
+
+% Test 4 Fix 10 evenly spaced indices along the full length
+fix_ind = round(linspace(1, Num_b, 10));
 
 %% Myogenic reference diameter & state (depends on y_displace, defined above)
 D0     = 2 * y_displace;             % Reference diameter (initial wall separation)
@@ -115,6 +129,14 @@ for j = 1:Ny
     y = (j-1)*dy;
     if (y > X_bot(1,2)) && (y < X_top(1,2))
         f_drive(:, j, 1) = G;   % uniform across all x-columns, but only inside the tube
+    end
+end
+
+% Test, add drive force at the middle
+for j = 1:Ny
+    y = (j-1)*dy;
+    if (y > X_bot(1,2)) && (y < X_top(1,2))
+        f_drive(Num_b / 2, j, 1) = G;   % only at the middle
     end
 end
 

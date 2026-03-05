@@ -278,7 +278,7 @@ for ii = 1 : n_total
     end
 
     % Capture and write frame
-    drawnow;
+    drawnow limitrate;
     frame = getframe(fig_main);
     writeVideo(v, frame);
 
