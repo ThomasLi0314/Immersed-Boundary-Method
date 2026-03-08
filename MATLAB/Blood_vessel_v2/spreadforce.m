@@ -2,11 +2,23 @@
 
 % Updated 251213
 
+% Vectorized
+
 function f_euler = spreadforce(F, X, dtheta, dx, dy, Num_b, Nx, Ny)
     % factor
     c = dtheta / (dx * dy);
     % Initiate force
     f_euler = zeros(Nx, Ny, 2);
+
+    %% Vectorized 
+    s_x = X(:, 1) / dx;
+    s_y = X(:, 2) / dy;
+
+    ix = floor(s_x);
+    iy = floor(s_y);
+
+    r_x = ix - s_x;
+    r_y = iy - s_y;
 
     for k = 1 : Num_b
         s_x = X(k, 1) / dx;

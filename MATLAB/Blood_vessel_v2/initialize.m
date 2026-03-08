@@ -7,18 +7,18 @@ close all;
 % Change this part
 % Time spacing
 Tmax = 20; % total time (s)
-dt = 0.0001; % Time spacing (s)
+dt = 0.001; % Time spacing (s)
 n_steps = floor(Tmax / dt); % Number of steps
-K_tar = 1e6; % Tether stiffness at anchor nodes (very large to pin endpoints)
+K_tar = 1e3; % Tether stiffness at anchor nodes (very large to pin endpoints)
 K_mem = 1e3;   % Stiffness constant between mass points (0 = flat rigid wall, no membrane elasticity)
 use_parallel = true; % Set true to start a parallel pool (speeds up internal MATLAB ops via implicit parallelism)
 
 ratio = K_tar / max(K_mem, eps); % the stiffness ratio (guard against K_mem = 0)
 
 %% Myogenic (Elastic-Contractile) Parameters — Arthurs et al. (1998), Eq. 60
-K_M     = 100;     % Myogenic spring stiffness (constant for initial impl.)
-gamma_M = 1;    % Viscous damping coefficient for diameter rate-of-change
-K_hor   = 10;   % Weak horizontal restoring stiffness (prevents downstream drift)
+K_M     = 0;     % Myogenic spring stiffness (constant for initial impl.)
+gamma_M = 0;   % Viscous damping coefficient for diameter rate-of-change
+K_hor   = 0;   % Weak horizontal restoring stiffness (prevents downstream drift)
 
 % K_M = 0;
 % gamma_M = 0
@@ -55,7 +55,7 @@ G = 10;       % body force (code units)
 % Grid size — brain arteriole: ~200 µm long, domain 100 µm wide
 Lx = 200;   % vessel length (µm)
 Ly = 100;   % domain width  (µm)
-Nx = 512;   % grid points in x
+Nx = 256;   % grid points in x
 Ny = Nx * Ly / Lx;  % = 64
 
 % Grid spacing 
@@ -110,6 +110,26 @@ X_bot(:, 2) = Ly / 2 - y_displace;
 % Test 4 Fix 10 evenly spaced indices along the full length
 fix_ind = round(linspace(1, Num_b, 10));
 
+% Test 5: Exponential decay tether from K_tar (endpoints) to K_wall (interior)
+%   - K_tar  = 1e6 at node 1 and node Num_b (strong anchoring)
+%   - K_wall = 1e3 in the deep interior   (baseline tissue rigidity)
+%   - Smooth exponential transition between the two
+K_wall = 1e1;        % interior (minimum) tether stiffness
+decay_len = 15;      % characteristic decay length (in node indices)
+
+% Distance from each end (0-based)
+dist_from_start = (0 : Num_b - 1)';
+dist_from_end   = (Num_b - 1 : -1 : 0)';
+
+% Exponential profiles from each end, take the stronger of the two
+K_from_start = (K_tar - K_wall) * exp(-dist_from_start / decay_len) + K_wall;
+K_from_end   = (K_tar - K_wall) * exp(-dist_from_end   / decay_len) + K_wall;
+K_tar_vec    = max(K_from_start, K_from_end)';   % 1 x Num_b
+
+
+%% Spring force part
+% set spring force only at the potision whe
+
 %% Myogenic reference diameter & state (depends on y_displace, defined above)
 D0     = 2 * y_displace;             % Reference diameter (initial wall separation)
 D_prev = D0 * ones(Num_b, 1);        % Previous-step diameter for ∂_t D approx.
@@ -150,5 +170,6 @@ frame = 30;
 sample_rate = round(1 / frame / dt);  % must be integer for mod() check in main loop
 % Initialize storing
 n_saved = floor(n_steps / sample_rate) + 1;
+
 
 

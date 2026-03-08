@@ -3,20 +3,15 @@ clc;
 close all;
 
 %% Plot Switches
-plot_velocity_profile = true;  % Set true to include u_x cross-section profile at mid-x
+plot_velocity_profile = false;  % Set true to include u_x cross-section profile at mid-x
+plot_intersection     = true;  % Set true to draw EC connection lines between top/bottom boundary
+plot_pressure         = false;  % Set true to include pressure centerline subplot
 
 %% Load Data with File Selection
-% Build paths: Simulation_Results/<project_name>/<date>
+% Build paths: Simulation_Results/<project_name>
 results_base = 'D:\Documents\College\Research\Immersed Boundary Methods\Simulation_Results';
 [~, project_name] = fileparts(fileparts(mfilename('fullpath')));
-date_folder = string(datetime('now'), 'yyyy-MM-dd');
 output_folder = fullfile(results_base, project_name);
-animation_folder = fullfile(results_base, project_name, date_folder);
-
-% Create animation folder (and parents) if it doesn't exist
-if ~exist(animation_folder, 'dir')
-    mkdir(animation_folder);
-end
 
 % Set initial path for file dialog to the project results folder
 if exist(output_folder, 'dir')
@@ -33,6 +28,7 @@ if isequal(file, 0)
     return;
 else
     full_file_path = fullfile(path, file);
+    animation_folder = path; % Save animation in the same folder as the .mat file
     fprintf('Loading %s...\n', full_file_path);
     load(full_file_path);
 end
@@ -41,6 +37,13 @@ end
 % Construct output filename based on input filename
 [~, name, ~] = fileparts(file);
 video_filename = fullfile(animation_folder, [name, '_animation.mp4']);
+
+% Determine if we need to append a version number to avoid overwriting
+v_idx = 2;
+while exist(video_filename, 'file')
+    video_filename = fullfile(animation_folder, sprintf('%s_animation_v%d.mp4', name, v_idx));
+    v_idx = v_idx + 1;
+end
 
 % Create VideoWriter object
 v = VideoWriter(video_filename, 'MPEG-4');
@@ -75,12 +78,16 @@ y_coords = linspace(0, Ly, Ny);
 
 %% Animation Settings — Pre-create all plot objects once
 fig_main = figure('Name', 'Velocity & Pressure Animation', 'Color', 'w', 'Visible', 'off');
-if plot_velocity_profile
+n_bottom_panels = plot_pressure + plot_velocity_profile;  % 0, 1, or 2
+if n_bottom_panels == 2
     set(fig_main, 'Position', [100, 100, 1100, 700]);
     ax_main = subplot(2,2,[1,2], 'Parent', fig_main);
-else
+elseif n_bottom_panels == 1
     set(fig_main, 'Position', [100, 100, 800, 700]);
     ax_main = subplot(2,1,1, 'Parent', fig_main);
+else
+    set(fig_main, 'Position', [100, 100, 800, 500]);
+    ax_main = axes('Parent', fig_main);
 end
 hold(ax_main, 'on');
 axis(ax_main, 'equal');
@@ -118,31 +125,43 @@ h_top = plot3(ax_main, NaN, NaN, NaN, 'r.', 'MarkerSize', 10);
 h_bot = plot3(ax_main, NaN, NaN, NaN, 'r.', 'MarkerSize', 10);
 
 % EC (elastic-contractile) connection lines between opposing nodes (at z=1)
-h_ec = plot3(ax_main, NaN, NaN, NaN, 'm-', 'LineWidth', 0.5);
-
-% Distinct anchor-node markers (green squares, larger, at z=1)
-h_anchor_top = plot3(ax_main, NaN, NaN, NaN, 'gs', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
-h_anchor_bot = plot3(ax_main, NaN, NaN, NaN, 'gs', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
+% if plot_intersection
+%     h_ec = plot3(ax_main, NaN, NaN, NaN, 'm-', 'LineWidth', 0.5);
+% 
+%     % Distinct anchor-node markers (green squares, larger, at z=1)
+%     h_anchor_top = plot3(ax_main, NaN, NaN, NaN, 'gs', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
+%     h_anchor_bot = plot3(ax_main, NaN, NaN, NaN, 'gs', 'MarkerSize', 8, 'MarkerFaceColor', 'g');
+% end
 
 % Title handle
 h_title_main = title(ax_main, '');
 
+% Force annotation at mid-boundary point (disabled)
+% mid_b_idx = round(size(X_history_top, 1) / 2);
+% if exist('F_history_top', 'var')
+%     h_force_text = text(ax_main, 0.02, 0.02, '', 'Units', 'normalized', ...
+%         'FontSize', 11, 'Color', 'w', 'BackgroundColor', [0 0 0 0.5], ...
+%         'VerticalAlignment', 'bottom', 'Interpreter', 'none');
+% end
+
 %% Pressure Centerline Subplot Setup
-centerline_y_idx = round(Ny / 2);
-if plot_velocity_profile
-    ax_pressure = subplot(2,2,3, 'Parent', fig_main);
-else
-    ax_pressure = subplot(2,1,2, 'Parent', fig_main);
+if plot_pressure
+    centerline_y_idx = round(Ny / 2);
+    if n_bottom_panels == 2
+        ax_pressure = subplot(2,2,3, 'Parent', fig_main);
+    else
+        ax_pressure = subplot(2,1,2, 'Parent', fig_main);
+    end
+    hold(ax_pressure, 'on');
+    grid(ax_pressure, 'on');
+    box(ax_pressure, 'on');
+    set(ax_pressure, 'FontSize', 12);
+    xlabel(ax_pressure, 'X (\mum)');
+    ylabel(ax_pressure, 'Pressure');
+    h_pressure_line = plot(ax_pressure, x_coords, zeros(1, Nx), 'b-', 'LineWidth', 2);
+    h_title_pressure = title(ax_pressure, 'Pressure along vessel centerline (\mum^2/s^2)');
+    xlim(ax_pressure, [0 Lx]);
 end
-hold(ax_pressure, 'on');
-grid(ax_pressure, 'on');
-box(ax_pressure, 'on');
-set(ax_pressure, 'FontSize', 12);
-xlabel(ax_pressure, 'X (\mum)');
-ylabel(ax_pressure, 'Pressure');
-h_pressure_line = plot(ax_pressure, x_coords, zeros(1, Nx), 'b-', 'LineWidth', 2);
-h_title_pressure = title(ax_pressure, 'Pressure along vessel centerline (\mum^2/s^2)');
-xlim(ax_pressure, [0 Lx]);
 
 fprintf('Starting velocity & pressure animation and recording...\n');
 
@@ -184,7 +203,11 @@ if plot_velocity_profile
     H_channel_cs  = y_top_wall_cs - y_bot_wall_cs;
     u_theory = G ./ (2 * mu) .* max(y_coords - y_bot_wall_cs, 0) .* max(y_top_wall_cs - y_coords, 0);
 
-    ax_cross = subplot(2,2,4, 'Parent', fig_main);
+    if n_bottom_panels == 2
+        ax_cross = subplot(2,2,4, 'Parent', fig_main);
+    else
+        ax_cross = subplot(2,1,2, 'Parent', fig_main);
+    end
     hold(ax_cross, 'on');
     grid(ax_cross, 'on');
     box(ax_cross, 'on');
@@ -239,27 +262,36 @@ for ii = 1 : n_total
     set(h_top, 'XData', X_current_top(:,1), 'YData', X_current_top(:,2), 'ZData', ones(size(X_current_top,1),1));
     set(h_bot, 'XData', X_current_bot(:,1), 'YData', X_current_bot(:,2), 'ZData', ones(size(X_current_bot,1),1));
 
-    % ---- Update EC connection lines ----
-    ec_stride = 5;   % draw every 5th connection to avoid clutter
-    ec_idx = 1:ec_stride:size(X_current_top, 1);
-    x_ec = [X_current_top(ec_idx,1), X_current_bot(ec_idx,1), NaN(numel(ec_idx),1)]';
-    y_ec = [X_current_top(ec_idx,2), X_current_bot(ec_idx,2), NaN(numel(ec_idx),1)]';
-    z_ec = [ones(numel(ec_idx),1), ones(numel(ec_idx),1), NaN(numel(ec_idx),1)]';
-    set(h_ec, 'XData', x_ec(:), 'YData', y_ec(:), 'ZData', z_ec(:));
-
-    % ---- Update anchor markers ----
-    if exist('fix_ind', 'var')
-        n_fix = numel(fix_ind);
-        set(h_anchor_top, 'XData', X_current_top(fix_ind,1), 'YData', X_current_top(fix_ind,2), 'ZData', ones(n_fix,1));
-        set(h_anchor_bot, 'XData', X_current_bot(fix_ind,1), 'YData', X_current_bot(fix_ind,2), 'ZData', ones(n_fix,1));
-    end
+    % ---- EC connection lines & anchor markers (disabled) ----
+    % if plot_intersection
+    %     ec_stride = 5;
+    %     ec_idx = 1:ec_stride:size(X_current_top, 1);
+    %     x_ec = [X_current_top(ec_idx,1), X_current_bot(ec_idx,1), NaN(numel(ec_idx),1)]';
+    %     y_ec = [X_current_top(ec_idx,2), X_current_bot(ec_idx,2), NaN(numel(ec_idx),1)]';
+    %     z_ec = [ones(numel(ec_idx),1), ones(numel(ec_idx),1), NaN(numel(ec_idx),1)]';
+    %     set(h_ec, 'XData', x_ec(:), 'YData', y_ec(:), 'ZData', z_ec(:));
+    %
+    %     if exist('fix_ind', 'var')
+    %         n_fix = numel(fix_ind);
+    %         set(h_anchor_top, 'XData', X_current_top(fix_ind,1), 'YData', X_current_top(fix_ind,2), 'ZData', ones(n_fix,1));
+    %         set(h_anchor_bot, 'XData', X_current_bot(fix_ind,1), 'YData', X_current_bot(fix_ind,2), 'ZData', ones(n_fix,1));
+    %     end
+    % end
 
     current_time = k * sample_rate * dt;
     set(h_title_main, 'String', sprintf('t = %.3f s | Re = %.2f | \\mu = %g | G = %g | K_M = %g', ...
           current_time, Re_channel, mu, G, K_M));
 
+    % ---- Force annotation (disabled) ----
+    % if exist('F_history_top', 'var')
+    %     F_mid = F_history_top(mid_b_idx, :, k);
+    %     F_mag = sqrt(F_mid(1)^2 + F_mid(2)^2);
+    %     set(h_force_text, 'String', sprintf('F_mid(top): Fx=%.2e  Fy=%.2e  |F|=%.2e', ...
+    %         F_mid(1), F_mid(2), F_mag));
+    % end
+
     % ---- Update pressure centerline plot ----
-    if exist('p_history', 'var')
+    if plot_pressure && exist('p_history', 'var')
         p_centerline = p_history(:, centerline_y_idx, k);
         set(h_pressure_line, 'YData', p_centerline);
         p_range = max(p_centerline) - min(p_centerline);

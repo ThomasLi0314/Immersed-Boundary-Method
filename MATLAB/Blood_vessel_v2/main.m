@@ -27,6 +27,8 @@ u_history = zeros(Nx, Ny, 2, n_saved);
 p_history = zeros(Nx, Ny, n_saved);
 X_history_top = zeros(Num_b, 2, n_saved);
 X_history_bot = X_history_top;
+F_history_top = zeros(Num_b, 2, n_saved);  % total Lagrangian force on top wall
+F_history_bot = zeros(Num_b, 2, n_saved);  % total Lagrangian force on bot wall
 
 %% Display Reynolds number of this setting
 % Wall positions from saved ghost/target points
@@ -48,46 +50,55 @@ for clock = 1 : n_steps
     X_half_bot = X_bot + dt / 2 * interpolation_vec(u, X_bot, Num_b, Nx, Ny, dx, dy);
     time_interp = time_interp + toc(t0);
 
-    % Penalty (tether) force — applied ONLY at anchor nodes (fix_ind)
+    %% Force part
+
+    %% Penalty (tether) force — applied ONLY at anchor nodes (fix_ind)
     F_penalty_top = zeros(Num_b, 2);
     F_penalty_bot = zeros(Num_b, 2);
-    F_penalty_top(fix_ind, :) = K_tar * (Y_top(fix_ind, :) - X_half_top(fix_ind, :));
-    F_penalty_bot(fix_ind, :) = K_tar * (Y_bot(fix_ind, :) - X_half_bot(fix_ind, :));
-    % set force at end point and start point to be 0 ( is this necessary?)
-    % For F_penalty_top
-    % F_penalty_top([1, size(F_penalty_top, 1)], :) = 0;
-    % 
-    % % For F_penalty_bot
-    % F_penalty_bot([1, size(F_penalty_bot, 1)], :) = 0;
 
-    %% Part 2, spring force between adjacent points (periodic, Hooke's law)
-    %  Uses circshift so the wrap-around 
-    X_next_top = circshift(X_top, -1, 1);  
-    X_next_bot = circshift(X_bot, -1, 1);
+    % F_penalty_top(fix_ind, :) = K_tar.* (Y_top(fix_ind, :) - X_half_top(fix_ind, :));
+    % F_penalty_bot(fix_ind, :) = K_tar.* (Y_bot(fix_ind, :) - X_half_bot(fix_ind, :));
 
-    % Num_b x 2  segment vectors
-    dX_top = X_next_top - X_top;            
-    dX_bot = X_next_bot - X_bot;
-    % segment lengths
+    % Use the exponential decay version
+    F_penalty_top(:, :) = K_tar_vec' .* (Y_top(:, :) - X_half_top(:, :));
+    F_penalty_bot(:, :) = K_tar_vec' .* (Y_bot(:, :) - X_half_bot(:, :));
+
+
+    %% Part 2, spring force between adjacent points (Hooke's law, open ends)
+    %  Num_b points -> (Num_b - 1) segments
+    %  Segment k connects node k to node k+1
+    dX_top = X_top(2:end, :) - X_top(1:end-1, :);            
+    dX_bot = X_bot(2:end, :) - X_bot(1:end-1, :);
+    
+    % Segment lengths
     L_top  = sqrt(sum(dX_top.^2, 2));       
     L_bot  = sqrt(sum(dX_bot.^2, 2));
-    % extension beyond rest length
+    
+    % Extension beyond rest length
     stretch_top = L_top - ds0;              
     stretch_bot = L_bot - ds0;
-    % unit direction vectors
+    
+    % Unit direction vectors (pointing from k to k+1)
     dir_top = dX_top ./ L_top;             
     dir_bot = dX_bot ./ L_bot;
 
-    % Segment force: K * stretch * direction  (Num_b x 2)
+    % Segment force magnitude & direction (Num_b - 1 x 2)
+    % +seg_f pulls node k toward k+1
+    % -seg_f pulls node k+1 toward k
     seg_f_top = (K_mem * stretch_top) .* dir_top;
     seg_f_bot = (K_mem * stretch_bot) .* dir_bot;
 
-    % Each segment k (between node k and next node) contributes:
-    %   +seg_f to node k  (pulled toward next)
-    %   -seg_f to next node (pulled toward k)
-    % Net on node k = seg_f(k) − seg_f(prev_k)  = seg_f(k) − circshift(seg_f,+1)
-    F_spring_top = seg_f_top - circshift(seg_f_top, 1, 1);
-    F_spring_bot = seg_f_bot - circshift(seg_f_bot, 1, 1);
+    % Accumulate forces onto nodes
+    F_spring_top = zeros(Num_b, 2);
+    F_spring_bot = zeros(Num_b, 2);
+    
+    % Node k experiences force from segment k (pulling forward)
+    F_spring_top(1:end-1, :) = F_spring_top(1:end-1, :) + seg_f_top;
+    F_spring_bot(1:end-1, :) = F_spring_bot(1:end-1, :) + seg_f_bot;
+    
+    % Node k+1 experiences negative force from segment k (pulling backward)
+    F_spring_top(2:end, :) = F_spring_top(2:end, :) - seg_f_top;
+    F_spring_bot(2:end, :) = F_spring_bot(2:end, :) - seg_f_bot;
 
     F_tot_top = F_penalty_top + F_spring_top;
     F_tot_bot = F_penalty_bot + F_spring_bot;
@@ -115,20 +126,20 @@ for clock = 1 : n_steps
     F_tot_top = F_tot_top + F_myo_top;
     F_tot_bot = F_tot_bot + F_myo_bot;
 
-    %% Part 4, Horizontal restoring force (x-direction only)
-    %  Prevents downstream drift; nodes stay near initial x-positions
-    F_hor_top = zeros(Num_b, 2);
-    F_hor_bot = zeros(Num_b, 2);
-    F_hor_top(:, 1) = K_hor * (Y_top(:, 1) - X_top(:, 1));
-    F_hor_bot(:, 1) = K_hor * (Y_bot(:, 1) - X_bot(:, 1));
+    % %% Part 4, Horizontal restoring force (x-direction only)
+    % %  Prevents downstream drift; nodes stay near initial x-positions
+    % F_hor_top = zeros(Num_b, 2);
+    % F_hor_bot = zeros(Num_b, 2);
+    % F_hor_top(:, 1) = K_hor * (Y_top(:, 1) - X_top(:, 1));
+    % F_hor_bot(:, 1) = K_hor * (Y_bot(:, 1) - X_bot(:, 1));
 
-    F_tot_top = F_tot_top + F_hor_top;
-    F_tot_bot = F_tot_bot + F_hor_bot;
+    % F_tot_top = F_tot_top + F_hor_top;
+    % F_tot_bot = F_tot_bot + F_hor_bot;
 
     %% Spread the force to Eucledian space
     t0 = tic;
-    f_top = spreadforce(F_tot_top, X_half_top, dtheta, dx, dy, Num_b, Nx, Ny);
-    f_bot = spreadforce(F_tot_bot, X_half_bot, dtheta, dx, dy, Num_b, Nx, Ny);
+    f_top = spreadforce_vec(F_tot_top, X_half_top, dtheta, dx, dy, Num_b, Nx, Ny);
+    f_bot = spreadforce_vec(F_tot_bot, X_half_bot, dtheta, dx, dy, Num_b, Nx, Ny);
     time_spread = time_spread + toc(t0);
 
     f_boundary = f_top + f_bot; % Force from boundary to fluid;
@@ -172,6 +183,8 @@ for clock = 1 : n_steps
         p_history(:, :, save_idx) = p;
         X_history_top(:, :, save_idx) = X_top;
         X_history_bot(:, :, save_idx) = X_bot;
+        F_history_top(:, :, save_idx) = F_tot_top;
+        F_history_bot(:, :, save_idx) = F_tot_bot;
     end
 
     % Display Progress
@@ -215,7 +228,7 @@ full_path_sim = fullfile(output_folder, filename_sim);
 
 % 4. Save data
 save(full_path_sim, 'u_history', 'p_history', 'X_history_top','X_history_bot', 'Y_top','Y_bot', 'Nx', 'Ny', 'Lx', 'Ly', 'dx', 'dy', 'n_steps', 'dt', 'sample_rate', 'G', 'f_drive', 'mu', 'rho', ...
-    'K_M', 'gamma_M', 'D0', 'fix_ind');
+    'K_M', 'gamma_M', 'D0', 'fix_ind', 'F_history_top', 'F_history_bot');
 
 fprintf('Data saved to: %s\n', full_path_sim);
 
